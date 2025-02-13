@@ -3,19 +3,24 @@
  * Unified IT Ticket System.
  *
  * This file handles dark mode toggling, form submissions,
- * ticket rendering, and all visualization pages.
+ * ticket rendering, escalation, and all other interactions.
  *
- * Console logs have been added for enhanced traceability.
+ * Comments are added in simple language to explain every step.
  **************************************************/
 
-// For demonstration, we define a global currentUser.
-// In production, replace with your auth logic.
+// Global variable for the current user.
+// This tells our system who you are.
 const currentUser = "UserA"; // Change to "AdminUser" to simulate admin actions.
 
+// Wait until the page (DOM) is fully loaded before running our code.
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[INFO] Application initialized.');
 
-  // Initialize Dark Mode Toggle across all pages.
+  /* -------------------------------
+   * Global: Dark Mode Toggle
+   * When you click the toggle button, the site switches between dark and light mode.
+   * It's like turning a light switch on and off.
+   ------------------------------- */
   const toggleThemeBtn = document.getElementById('toggleTheme');
   if (toggleThemeBtn) {
     toggleThemeBtn.addEventListener('click', () => {
@@ -32,19 +37,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Sub-Department Display Handler (index.html)
+  /* -------------------------------
+   * Module 1: Sub-Department Handler (index.html)
+   * Show or hide sub-department fields based on the chosen department.
+   ------------------------------- */
   const departmentSelect = document.getElementById('department');
   if (departmentSelect) {
     departmentSelect.addEventListener('change', function () {
-      const selected = this.value;
+      const selected = this.value; // This gets the chosen department.
       console.log('[INFO] Department selected:', selected);
+      // Show the right box or hide it if it's not needed.
       document.getElementById('medical-sub-department').style.display = (selected === 'Medical') ? 'block' : 'none';
       document.getElementById('admin-sub-department').style.display = (selected === 'Administrative') ? 'block' : 'none';
       document.getElementById('support-sub-department').style.display = (selected === 'Support') ? 'block' : 'none';
     });
   }
 
-  // Ticket Form Submission Handler (index.html)
+  /* -------------------------------
+   * Module 2: Ticket Form Submission (index.html)
+   * Check if the form is filled correctly, read the file if provided,
+   * save the ticket, and then reset the form.
+   ------------------------------- */
   const ticketForm = document.getElementById('ticketForm');
   if (ticketForm) {
     ticketForm.addEventListener('submit', function (event) {
@@ -58,11 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       console.log('[INFO] Ticket form submitted successfully.');
+      // Build a ticket object with all the form information.
       const ticket = {
         name: document.getElementById('name').value,
         email: document.getElementById('email').value,
         phone: document.getElementById('phone').value,
         department: document.getElementById('department').value,
+        // Immediately Invoked Function Expression (IIFE) to get sub-department.
         subDepartment: (function () {
           const dept = document.getElementById('department').value;
           if (dept === 'Medical') return document.getElementById('medical-department').value;
@@ -71,31 +86,31 @@ document.addEventListener('DOMContentLoaded', () => {
           return '';
         })(),
         issue: document.getElementById('issue').value.trim(),
-        screenshot: null,
+        screenshot: null, // This will hold our file data if uploaded.
         timestamp: new Date().toISOString(),
         signatures: {
-          sig1: true,      // Auto-approved signature.
-          sig2: false,     // Pending escalation.
-          sig3: false      // Pending final approval.
+          sig1: true,   // This one is automatically approved.
+          sig2: false,  // This one waits for escalation.
+          sig3: false   // This one waits for final approval.
         }
       };
 
-      // Process file upload if present.
+      // Check if a screenshot file is provided.
       const fileInput = document.getElementById('screenshot');
       if (fileInput && fileInput.files[0]) {
-        const reader = new FileReader();
+        const reader = new FileReader(); // FileReader helps us read the file.
         reader.onload = function (e) {
-          ticket.screenshot = e.target.result;
+          ticket.screenshot = e.target.result; // Save the file content in our ticket.
           saveTicket(ticket);
           finalizeSubmission();
         };
-        reader.readAsDataURL(fileInput.files[0]);
+        reader.readAsDataURL(fileInput.files[0]); // Read file as a base64 encoded string.
       } else {
         saveTicket(ticket);
         finalizeSubmission();
       }
 
-      // Save ticket to localStorage.
+      // This function saves our ticket into local storage (like a digital filing cabinet).
       function saveTicket(ticket) {
         try {
           const tickets = JSON.parse(localStorage.getItem('tickets')) || [];
@@ -107,10 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Reset form and show confirmation modal.
+      // This function resets the form and shows a confirmation modal.
       function finalizeSubmission() {
         ticketForm.reset();
         ticketForm.classList.remove('was-validated');
+        // Hide sub-department fields after submission.
         ['medical-sub-department', 'admin-sub-department', 'support-sub-department'].forEach(id => {
           const elem = document.getElementById(id);
           if (elem) elem.style.display = 'none';
@@ -122,7 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // View Tickets Handler (index.html)
+  /* -------------------------------
+   * Module 3: View Tickets (index.html)
+   * When a user clicks "View Saved Tickets", load tickets from local storage
+   * and show them in a modal so you can pick one to view.
+   ------------------------------- */
   const viewTicketsLink = document.getElementById('viewTicketsLink');
   if (viewTicketsLink) {
     viewTicketsLink.addEventListener('click', function (event) {
@@ -142,10 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ticketList.innerHTML = '<p class="text-center">No tickets found.</p>';
       } else {
         tickets.forEach((ticket, index) => {
+          // Create a button for each saved ticket.
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'list-group-item list-group-item-action';
           btn.innerHTML = `<strong>${ticket.name}</strong> - ${new Date(ticket.timestamp).toLocaleString()}`;
+          // When the button is clicked, go to the ticket detail page.
           btn.addEventListener('click', function () {
             window.location.href = `ticket_detail.html?ticketIndex=${index}`;
           });
@@ -158,17 +180,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Utility: Retrieve query parameter value by name.
+  /* -------------------------------
+   * Utility: getParameterByName
+   * This function finds a value in the URL query string by its name.
+   * Example: ?ticketIndex=2 will return "2" when you ask for "ticketIndex".
+   ------------------------------- */
   function getParameterByName(name, url = window.location.href) {
+    // Replace special characters in the name for regex.
     name = name.replace(/[\[\]]/g, '\\$&');
     const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url);
+          results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
-  // Update ticket in localStorage by index.
+  /* -------------------------------
+   * Utility: updateTicket
+   * This function updates an existing ticket in local storage.
+   * It finds the ticket by its index and saves the new version.
+   ------------------------------- */
   function updateTicket(index, updatedTicket) {
     let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
     tickets[index] = updatedTicket;
@@ -176,14 +207,19 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[INFO] Ticket updated at index', index, updatedTicket);
   }
 
-  // Render Ticket Detail and Escalation UI (ticket_detail.html)
+  /* -------------------------------
+   * Module 4: Ticket Detail & Escalation (ticket_detail.html)
+   * This code displays the detailed information of a ticket on its page.
+   * It also handles escalation by showing a math problem for approval.
+   * Additionally, it allows the admin to verify the ticket by answering a question.
+   ------------------------------- */
   const ticketDetailElem = document.getElementById('ticketDetail');
   if (ticketDetailElem) {
     let currentIndex = parseInt(getParameterByName('ticketIndex'), 10);
     if (isNaN(currentIndex)) { currentIndex = 0; }
     renderTicketDetail(currentIndex);
 
-    // Pagination Button Handlers.
+    // Pagination: Previous and Next buttons change the ticket index.
     document.getElementById('prevTicket').addEventListener('click', function () {
       if (currentIndex > 0) {
         currentIndex--;
@@ -199,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Function to render ticket details and handle escalation signatures.
+  // This function renders the ticket details based on the given index.
+  // It shows all the ticket information and then calls renderSignatures() later.
   function renderTicketDetail(index) {
     let tickets = [];
     try {
@@ -213,10 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     let ticket = tickets[index];
 
-    // Initialize signatures and dueTime if not present.
+    // Initialize signatures if they are not present.
     if (!ticket.signatures) {
       const submissionTime = new Date(ticket.timestamp);
-      const dueTime = new Date(submissionTime.getTime() + 12 * 60 * 60 * 1000);
+      const dueTime = new Date(submissionTime.getTime() + 12 * 60 * 60 * 1000); // 12 hours later
       ticket.signatures = {
         sig1: true,
         sig2: false,
@@ -226,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateTicket(index, ticket);
     }
 
-    // Render ticket details.
+    // Build HTML to display ticket details.
     const ticketData = document.getElementById('ticketData');
     let detailsHTML = `
       <li class="list-group-item"><strong>Name:</strong> ${ticket.name}</li>
@@ -255,14 +292,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('prevTicket').disabled = (index === 0);
     document.getElementById('nextTicket').disabled = (index === tickets.length - 1);
 
-    // Render signatures and escalation UI.
+    // Call function to render signature statuses and escalation options.
     renderSignatures(ticket, index);
   }
 
-  // Global variable for the correct math answer.
+  /* -------------------------------
+   * Global Variable: correctAnswer
+   * This holds the correct answer for our math problem.
+   ------------------------------- */
   let correctAnswer = null;
 
-  // Generate a random math problem for escalation.
+  /* -------------------------------
+   * Function: generateMathProblem
+   * This function creates a simple addition problem.
+   * It picks two random numbers between 1 and 10, sums them, and returns the problem as a string.
+   * The correct answer is stored in 'correctAnswer'.
+   ------------------------------- */
   function generateMathProblem() {
     const a = Math.floor(Math.random() * 10) + 1;
     const b = Math.floor(Math.random() * 10) + 1;
@@ -270,17 +315,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return `What is ${a} + ${b}?`;
   }
 
-  // Render signatures and handle escalation and final approval.
+  /* -------------------------------
+   * Function: renderSignatures
+   * This function displays the approval status of each signature and handles
+   * escalation and final approval steps.
+   * We now allow the admin to verify the ticket by answering a question.
+   ------------------------------- */
   function renderSignatures(ticket, index) {
     const sigStatusDiv = document.getElementById('signatureStatus');
     const escalationDiv = document.getElementById('escalationProcess');
     sigStatusDiv.innerHTML = '';
     escalationDiv.innerHTML = '';
 
-    // Signature 1: Auto-approved.
+    // Display Signature 1 (auto-approved).
     sigStatusDiv.innerHTML += `<p><strong>Signature 1:</strong> Approved (Auto-assigned)</p>`;
 
-    // Signature 2: Requires escalation (math problem).
+    // Handle Signature 2: Escalation step.
     if (!ticket.signatures.sig2) {
       sigStatusDiv.innerHTML += `<p><strong>Signature 2:</strong> Pending</p>`;
       escalationDiv.innerHTML = `<button id="escalateBtn" class="btn btn-info">Escalate Ticket (Solve Math Problem)</button>`;
@@ -297,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('submitMath').addEventListener('click', function () {
           const userAnswer = parseInt(document.getElementById('mathAnswer').value, 10);
           if (userAnswer === correctAnswer) {
-            // Record the escalator's identity.
             ticket.signatures.sig2 = true;
             ticket.escalatedBy = currentUser;
             updateTicket(index, ticket);
@@ -317,43 +366,41 @@ document.addEventListener('DOMContentLoaded', () => {
       sigStatusDiv.innerHTML += `<p><strong>Signature 2:</strong> Approved</p>`;
     }
 
-    // Signature 3: Final Approval.
+    // Handle Signature 3: Final Approval step.
     if (ticket.signatures.sig2) {
       if (!ticket.signatures.sig3) {
         // When the ticket is pending admin verification...
         if (ticket.verificationPending) {
           if (currentUser === "AdminUser") {
-            // Render a checkbox that acts as the 'admin secret'
+            // Instead of a secret, ask the admin to verify by answering a question.
             escalationDiv.innerHTML += `
-              <div class="admin-secret-container">
-                <input type="checkbox" id="adminSecretCheckbox">
-                <label for="adminSecretCheckbox" class="admin-secret-label">I possess the admin secret</label>
-                <div id="finalApprovalContainer"></div>
+              <div class="admin-verification-container">
+                <p>Please answer the verification question to approve the ticket: What is 5 + 3?</p>
+                <input type="number" id="adminAnswer" class="form-control" placeholder="Your answer">
+                <button id="verifyTicketBtn" class="btn btn-warning mt-2">Verify Ticket</button>
+                <div id="adminFeedback"></div>
               </div>
             `;
-            document.getElementById('adminSecretCheckbox').addEventListener('change', function () {
-              const container = document.getElementById('finalApprovalContainer');
-              if (this.checked) {
-                container.innerHTML = `<button id="finalApprovalBtn" class="btn btn-warning mt-2 funny-animate">Final Approval</button>`;
-                document.getElementById('finalApprovalBtn').addEventListener('click', function () {
-                  ticket.signatures.sig3 = true;
-                  updateTicket(index, ticket);
-                  let solvedTickets = JSON.parse(localStorage.getItem('solvedTickets')) || [];
-                  solvedTickets.push(ticket);
-                  localStorage.setItem('solvedTickets', JSON.stringify(solvedTickets));
-                  container.innerHTML = `<p class="text-success">Ticket fully approved and resolved!</p>`;
-                  console.log('[INFO] Ticket resolved by final approval:', ticket);
-                  renderSignatures(ticket, index);
-                });
+            document.getElementById('verifyTicketBtn').addEventListener('click', function () {
+              const adminAnswer = parseInt(document.getElementById('adminAnswer').value, 10);
+              if (adminAnswer === 8) {
+                ticket.signatures.sig3 = true;
+                updateTicket(index, ticket);
+                let solvedTickets = JSON.parse(localStorage.getItem('solvedTickets')) || [];
+                solvedTickets.push(ticket);
+                localStorage.setItem('solvedTickets', JSON.stringify(solvedTickets));
+                document.getElementById('adminFeedback').innerHTML = `<p class="text-success">Ticket verified and resolved!</p>`;
+                console.log('[INFO] Ticket verified by admin:', ticket);
+                renderSignatures(ticket, index);
               } else {
-                container.innerHTML = '';
+                document.getElementById('adminFeedback').innerHTML = `<p class="text-danger">Incorrect answer. Please try again.</p>`;
               }
             });
           } else {
             escalationDiv.innerHTML += `<p class="text-info">Ticket is pending admin verification.</p>`;
           }
         } else if (ticket.escalatedBy === currentUser && currentUser !== "AdminUser") {
-          // Allow non-admin users who escalated the ticket to send it back for verification.
+          // Allow non-admin users to send the ticket back for admin verification.
           escalationDiv.innerHTML += `<button id="sendBackBtn" class="btn btn-secondary mt-2">Send Ticket Back for Verification</button>`;
           document.getElementById('sendBackBtn').addEventListener('click', function () {
             ticket.verificationPending = true;
@@ -363,8 +410,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderSignatures(ticket, index);
           });
         } else {
-          // Normal final approval for users other than the escalator.
-          escalationDiv.innerHTML += `<button id="finalApprovalBtn" class="btn btn-warning mt-2 funny-animate">Final Approval</button>`;
+          // For all others, allow final approval without the verification question.
+          escalationDiv.innerHTML += `<button id="finalApprovalBtn" class="btn btn-warning mt-2">Final Approval</button>`;
           document.getElementById('finalApprovalBtn').addEventListener('click', function () {
             ticket.signatures.sig3 = true;
             updateTicket(index, ticket);
@@ -382,7 +429,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Display Solved Tickets (solved_tickets.html)
+  /* -------------------------------
+   * Module 5: Display Solved Tickets (solved_tickets.html)
+   * This function shows a list of tickets that are fully resolved.
+   ------------------------------- */
   const solvedListElem = document.getElementById('solvedList');
   if (solvedListElem) {
     displaySolvedTickets();
@@ -413,42 +463,45 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[INFO] Solved tickets displayed.');
   }
 
-// Display Escalated Tickets Timeline (ticket_escalated.html)
-const escalatedTimelineElem = document.getElementById('escalatedTimeline');
-if (escalatedTimelineElem) {
-  displayEscalatedTimeline();
-}
-function displayEscalatedTimeline() {
-  let escalatedTickets = [];
-  try {
-    escalatedTickets = JSON.parse(localStorage.getItem('escalatedTickets')) || [];
-  } catch (error) {
-    console.error('[ERROR] Retrieving escalated tickets failed:', error);
+  /* -------------------------------
+   * Module 6: Display Escalated Tickets Timeline (ticket_escalated.html)
+   * This function shows a timeline of tickets that have been escalated.
+   ------------------------------- */
+  const escalatedTimelineElem = document.getElementById('escalatedTimeline');
+  if (escalatedTimelineElem) {
+    displayEscalatedTimeline();
   }
-  let timelineHTML = '';
-  if (escalatedTickets.length === 0) {
-    timelineHTML = '<p>No escalated tickets found.</p>';
-  } else {
-    escalatedTickets.forEach((ticket) => {
-      // Determine arrow color based on ticket status:
-      // - If ticket.verificationPending is true, display a yellow arrow.
-      // - Otherwise, display a green arrow (recently escalated).
-      let arrowClass = ticket.verificationPending ? "arrow-yellow" : "arrow-green";
-      
-      timelineHTML += `
-        <div class="timeline-item">
-          <i class="fas fa-arrow-up ${arrowClass}" aria-hidden="true"></i>
-          <p><strong>${ticket.name}</strong> - Escalated on: ${new Date(ticket.escalationTime).toLocaleString()}</p>
-          <p>Issue: ${ticket.issue}</p>
-        </div>
-      `;
-    });
+  function displayEscalatedTimeline() {
+    let escalatedTickets = [];
+    try {
+      escalatedTickets = JSON.parse(localStorage.getItem('escalatedTickets')) || [];
+    } catch (error) {
+      console.error('[ERROR] Retrieving escalated tickets failed:', error);
+    }
+    let timelineHTML = '';
+    if (escalatedTickets.length === 0) {
+      timelineHTML = '<p>No escalated tickets found.</p>';
+    } else {
+      escalatedTickets.forEach((ticket) => {
+        // Choose arrow color based on verification status.
+        let arrowClass = ticket.verificationPending ? "arrow-yellow" : "arrow-green";
+        timelineHTML += `
+          <div class="timeline-item">
+            <i class="fas fa-arrow-up ${arrowClass}" aria-hidden="true"></i>
+            <p><strong>${ticket.name}</strong> - Escalated on: ${new Date(ticket.escalationTime).toLocaleString()}</p>
+            <p>Issue: ${ticket.issue}</p>
+          </div>
+        `;
+      });
+    }
+    escalatedTimelineElem.innerHTML = timelineHTML;
+    console.log('[INFO] Escalated timeline displayed.');
   }
-  escalatedTimelineElem.innerHTML = timelineHTML;
-  console.log('[INFO] Escalated timeline displayed.');
-}
 
-  // Display Tracking Tickets (ticket_tracking.html)
+  /* -------------------------------
+   * Module 7: Display Tracking Tickets (ticket_tracking.html)
+   * This function shows tickets that are still open (not fully resolved).
+   ------------------------------- */
   const trackingTicketsElem = document.getElementById('trackingTickets');
   if (trackingTicketsElem) {
     displayTrackingTickets();
@@ -461,7 +514,7 @@ function displayEscalatedTimeline() {
       console.error('[ERROR] Retrieving tickets for tracking failed:', error);
     }
     let trackingHTML = '';
-    // Filter tickets that are not resolved.
+    // Filter for tickets that are not resolved (Signature 3 is false).
     const inProgressTickets = tickets.filter(ticket => !ticket.signatures || !ticket.signatures.sig3);
     if (inProgressTickets.length === 0) {
       trackingHTML = '<p>All tickets have been resolved.</p>';
