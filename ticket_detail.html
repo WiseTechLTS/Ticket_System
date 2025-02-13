@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    Meta Information:
+    - UTF-8 character encoding ensures broad character support.
+    - The viewport tag enables responsive design.
+  -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Details &amp; Escalation - Unified IT Ticket System</title>
+
+  <!--
+    External CSS Libraries:
+    - Bootstrap 5 provides a robust, responsive grid system and prebuilt components.
+    - Font Awesome supplies scalable vector icons.
+    - Global Styles consolidates custom styles into one modular file for maintainability.
+  -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="/styles.css" />
+  
+  <!--
+    Additional metadata (if needed, e.g., SEO, social sharing) can be added here.
+    Consider adding Open Graph tags for improved link previews.
+  -->
+</head>
+<body>
+  <!--
+    Dark Mode Toggle:
+    - A fixed-position button to switch between dark and light themes.
+    - Utilizes Font Awesome for an iconic representation.
+    - This element is intentionally kept outside of the main container for universal accessibility.
+  -->
+  <button id="toggleTheme" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
+    <i class="fas fa-adjust"></i> Toggle Theme
+  </button>
+
+  <!-- Main Content Container -->
+  <main class="container my-5">
+    <!--
+      Header Section:
+      - Centered header for clear visual hierarchy.
+      - Display-5 class from Bootstrap for appropriate typography.
+    -->
+    <header class="text-center mb-4">
+      <h1 class="display-5">Ticket Details &amp; Escalation</h1>
+    </header>
+
+    <!--
+      Ticket Detail Card:
+      - Encapsulates ticket information and resolution process.
+      - Uses Bootstrap’s card component for structured layout and shadow effect.
+      - ARIA roles and proper semantic tags could further enhance accessibility if needed.
+    -->
+    <article id="ticketDetail" class="card shadow-sm">
+      <!-- Card Header: Provides a succinct title for the card content -->
+      <div class="card-header">
+        <h2 class="h5 mb-0" id="ticketTitle">Ticket Information</h2>
+      </div>
+
+      <!-- Card Body: Primary container for dynamic ticket content -->
+      <div class="card-body">
+        <!--
+          Ticket Data List:
+          - Dynamically populated list group for displaying ticket attributes (e.g., name, issue, etc.).
+          - The 'id' attribute enables JavaScript injection of content.
+        -->
+        <ul class="list-group list-group-flush mb-4" id="ticketData"></ul>
+
+        <!--
+          Resolution Signatures Section:
+          - Separates the resolution process into a clear, visually distinct section.
+          - Contains both the current status and UI controls for escalation and final signature.
+        -->
+        <section id="signatureSection" class="mt-4">
+          <h3 class="h6">Resolution Signatures</h3>
+          <!--
+            Signature Status:
+            - Displays approval status for each resolution step.
+            - Dynamically updated based on ticket state.
+          -->
+          <div id="signatureStatus"></div>
+          <!--
+            Escalation Process:
+            - Contains dynamic content for interactive escalation (e.g., math problem, admin secret, final approval).
+            - JavaScript controls its content based on business logic.
+          -->
+          <div id="escalationProcess"></div>
+        </section>
+      </div>
+
+      <!--
+        Card Footer: Contains pagination controls to navigate through tickets.
+        - Two buttons allow moving to previous and next tickets.
+        - Pagination information is displayed centrally.
+      -->
+      <div class="card-footer d-flex justify-content-between">
+        <button id="prevTicket" class="btn btn-secondary" disabled aria-label="Previous Ticket">Previous Ticket</button>
+        <span id="paginationInfo" class="align-self-center"></span>
+        <button id="nextTicket" class="btn btn-secondary" disabled aria-label="Next Ticket">Next Ticket</button>
+      </div>
+    </article>
+  </main>
+
+  <!--
+    External JavaScript Files:
+    - Bootstrap Bundle JS includes necessary dependencies for components such as modals.
+    - main.js handles all dynamic functionality (e.g., ticket rendering, escalation, dark mode).
+  -->
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="/main.js"></script>
+</body>
+</html>
