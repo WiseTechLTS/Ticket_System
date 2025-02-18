@@ -1,0 +1,282 @@
+/**************************************************
+ * styles.css - Global Styles for the Unified IT Ticket System
+ **************************************************/
+
+/* ----------------------------------------------
+   Global Base Styles:
+   - Reset some default browser styles.
+   - Set a modern font and smooth transitions.
+---------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* ----------------------------------------------
+   Global Animations:
+   - fadeIn: Makes elements appear slowly.
+   - slideIn: Makes elements slide in from below.
+---------------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ----------------------------------------------
+   Card & Modal Styling:
+   - Gives cards and modals a consistent look with shadows and animations.
+---------------------------------------------- */
+.card,
+.modal-content {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  color: inherit;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.5s ease-out;
+}
+
+body.light-mode .card,
+body.light-mode .modal-content {
+  background-color: #fff;
+  border-color: #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ----------------------------------------------
+   Form Controls:
+   - Style input fields and selects with dark backgrounds and smooth focus effects.
+---------------------------------------------- */
+.form-control,
+.form-select {
+  background-color: #2c2c2c;
+  color: inherit;
+  border: 1px solid #444;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #888;
+  outline: none;
+  box-shadow: none;
+}
+
+/* ----------------------------------------------
+   Dark Mode Toggle Button:
+   - A fixed button in the top-right corner to switch modes.
+   - It scales slightly on hover for a fun effect.
+---------------------------------------------- */
+#toggleTheme {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: #333;
+  color: #e0e0e0;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+#toggleTheme:hover {
+  transform: scale(1.05);
+}
+
+/* ----------------------------------------------
+   Navigation Styles:
+   - Style links in the navigation for clarity.
+---------------------------------------------- */
+nav a {
+  color: inherit;
+  text-decoration: none;
+  margin: 0 10px;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  text-decoration: underline;
+  color: #aaa;
+}
+
+/* ----------------------------------------------
+   Global Home Button:
+   - A button style for any "Home" link.
+---------------------------------------------- */
+a.btn {
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+a.btn:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* ----------------------------------------------
+   Solved Tickets List:
+   - A scrollable container with a modern look.
+   - Uses slideIn animation for a smooth entrance.
+---------------------------------------------- */
+.solved-list {
+  overflow-y: auto;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  margin: 20px auto;
+  max-width: 800px;
+  animation: slideIn 0.5s ease-out;
+}
+
+.solved-list h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.solved-item {
+  border-bottom: 1px solid #333;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.solved-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* ----------------------------------------------
+   Timeline Styles:
+   - A vertical timeline to display escalated tickets.
+   - The line and dots give it a modern look.
+---------------------------------------------- */
+.timeline {
+  border-left: 3px solid #444;
+  margin: 20px auto;
+  padding-left: 20px;
+  max-width: 800px;
+  animation: slideIn 0.5s ease-out;
+}
+
+.timeline-item {
+  margin-bottom: 20px;
+  position: relative;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 5px;
+  width: 16px;
+  height: 16px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  border: 2px solid #444;
+}
+
+/* ----------------------------------------------
+   Ticket Tracking List:
+   - A container for tracking tickets with a neat, boxed layout.
+---------------------------------------------- */
+.tracking-list {
+  margin: 20px auto;
+  padding: 20px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 5px;
+  max-width: 800px;
+  animation: slideIn 0.5s ease-out;
+}
+
+.tracking-item {
+  border-bottom: 1px solid #444;
+  padding: 10px 0;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.tracking-item:last-child {
+  border-bottom: none;
+}
+
+/* ----------------------------------------------
+   Admin Secret Checkbox Container:
+   - Styling for the admin secret input area.
+---------------------------------------------- */
+.admin-secret-container {
+  margin-top: 10px;
+}
+
+.admin-secret-label {
+  cursor: pointer;
+}
+
+/* ----------------------------------------------
+   Funny Animations for Final Approval Button:
+   - rotate: Makes the element spin.
+   - shake: Moves it side-to-side.
+---------------------------------------------- */
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+
+.funny-animate {
+  animation: rotate 2s linear infinite, shake 0.5s ease-in-out infinite;
+}
+
+/* ----------------------------------------------
+   Arrow Styles for Escalated Timeline:
+   - Defines the look of the arrows that indicate escalated tickets.
+---------------------------------------------- */
+.arrow-green {
+  color: #4CAF50;
+  font-size: 1.5rem;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.arrow-yellow {
+  color: #FFC107;
+  font-size: 1.5rem;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* ----------------------------------------------
+   Global Fade-In Utility:
+   - Use the 'fade-in' class on any element you want to appear slowly.
+---------------------------------------------- */
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}

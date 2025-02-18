@@ -3,188 +3,476 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Unified IT Ticket System</title>
+  <title>Grand Unified IT Ticket System</title>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Font Awesome for iconography -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <!-- Global Styles -->
-  <link rel="stylesheet" href="/styles.css" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- Font Awesome for Iconography -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <style>
+    /* Global Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    /* Navbar Styling */
+    .navbar {
+      margin-bottom: 20px;
+    }
+    .nav-link.active {
+      font-weight: bold;
+    }
+
+    /* Card & Modal Styling */
+    .card,
+    .modal-content {
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      color: #333;
+      transition: transform 0.3s;
+    }
+    body.dark-mode .card,
+    body.dark-mode .modal-content {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      color: #e0e0e0;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    /* Form Controls */
+    .form-control,
+    .form-select {
+      background-color: #ffffff;
+      color: #333;
+      border: 1px solid #ccc;
+      transition: border-color 0.3s;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+      background-color: #2c2c2c;
+      color: #e0e0e0;
+      border: 1px solid #444;
+    }
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #888;
+      box-shadow: none;
+    }
+
+    /* Dark Mode Toggle Button */
+    #toggleTheme {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: #333;
+      color: #e0e0e0;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #toggleTheme:hover {
+      background: #555;
+    }
+
+    /* Section Styling */
+    section {
+      display: none;
+    }
+    section.active {
+      display: block;
+    }
+
+    /* Timeline, Tracking, & Solved Lists */
+    .timeline {
+      border-left: 2px solid #444;
+      padding-left: 20px;
+      margin: 20px 0;
+    }
+    .timeline-item {
+      margin-bottom: 20px;
+    }
+    .timeline-item::before {
+      content: "";
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background-color: #e0e0e0;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    body.dark-mode .timeline-item::before {
+      background-color: #e0e0e0;
+    }
+    .tracking-list,
+    .solved-list {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    body.dark-mode .tracking-list,
+    body.dark-mode .solved-list {
+      background: #1e1e1e;
+      border: 1px solid #333;
+    }
+    .tracking-item,
+    .solved-item {
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+    }
+    body.dark-mode .tracking-item,
+    body.dark-mode .solved-item {
+      border-bottom: 1px solid #444;
+    }
+    .tracking-item:last-child,
+    .solved-item:last-child {
+      border-bottom: none;
+    }
+
+    /* File Preview Styling */
+    .file-preview {
+      margin-top: 10px;
+      text-align: center;
+    }
+    .file-preview img {
+      max-width: 100%;
+      max-height: 200px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    body.dark-mode .file-preview img {
+      border: 2px solid #444;
+    }
+    .file-preview img.visible {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
-  <!-- Dark Mode Toggle Button -->
+  <!-- Dark Mode Toggle -->
   <button id="toggleTheme"><i class="fas fa-adjust"></i> Toggle Theme</button>
 
-  <!-- Main container -->
-  <main class="container my-5">
-    <!-- Hero Section with Navigation Links -->
-    <header class="text-center mb-5">
-      <h1 class="display-4">Unified IT Ticket System</h1>
-      <p class="lead">Submit your IT ticket seamlessly using our modern interface.</p>
-      <nav class="mb-3">
-        <a href="#" id="viewTicketsLink">View Saved Tickets</a> &nbsp;|&nbsp;
-        <a href="ticket_escalated.html">View Escalated Tickets</a> &nbsp;|&nbsp;
-        <a href="ticket_tracking.html">Track Tickets</a>
-      </nav>
-    </header>
-
-    <!-- Ticket Submission Card -->
-    <section class="card shadow-sm">
-      <div class="card-header text-center">
-        <h2 class="mb-0">Submit an IT Ticket</h2>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">IT Ticket System</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" data-target="submissionSection"
+              >Submit Ticket</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-target="detailsSection"
+              >Ticket Details</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-target="timelineSection"
+              >Escalated Timeline</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-target="trackingSection"
+              >Track Tickets</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-target="solvedSection"
+              >Solved Tickets</a
+            >
+          </li>
+        </ul>
       </div>
-      <div class="card-body">
-        <form id="ticketForm" class="needs-validation" novalidate>
-          <!-- Personal Information Section -->
-          <fieldset class="mb-4">
-            <legend class="h5">Personal Information</legend>
-            <div class="mb-3">
-              <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-              <input type="text" id="name" name="name" class="form-control" placeholder="Your name" required />
-              <div class="invalid-feedback">Please provide your name.</div>
-            </div>
-            <div class="mb-3">
-              <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-              <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required />
-              <div class="invalid-feedback">A valid email is required.</div>
-            </div>
-            <div class="mb-3">
-              <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
-              <input type="tel" id="phone" name="phone" class="form-control" placeholder="(123) 456-7890" required />
-              <div class="invalid-feedback">Please provide your phone number.</div>
-            </div>
-          </fieldset>
+    </div>
+  </nav>
 
-          <!-- Department Information Section -->
-          <fieldset class="mb-4">
-            <legend class="h5">Department Information</legend>
-            <div class="mb-3">
-              <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
-              <select id="department" name="department" class="form-select" required>
-                <option value="" disabled selected>Select a department</option>
-                <option value="Medical">Medical Departments</option>
-                <option value="Administrative">Administrative Departments</option>
-                <option value="Support">Support/Ancillary Departments</option>
-              </select>
-              <div class="invalid-feedback">Please select a department.</div>
+  <!-- Main Content -->
+  <main class="container my-5">
+    <!-- Ticket Submission Section -->
+    <section id="submissionSection" class="active">
+      <header class="text-center mb-4">
+        <h1>Submit an IT Ticket</h1>
+        <p class="lead">Use the form below to submit your IT ticket.</p>
+      </header>
+      <div class="card shadow-sm">
+        <div class="card-header text-center">
+          <h2 class="mb-0">Ticket Submission</h2>
+        </div>
+        <div class="card-body">
+          <form id="ticketForm" class="needs-validation" novalidate>
+            <!-- Personal Information -->
+            <fieldset class="mb-4">
+              <legend>Personal Information</legend>
+              <div class="mb-3">
+                <label for="name" class="form-label"
+                  >Name <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  class="form-control"
+                  required
+                  value="John Doe"
+                />
+                <div class="invalid-feedback">Please provide your name.</div>
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label"
+                  >Email <span class="text-danger">*</span></label
+                >
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-control"
+                  required
+                  value="johndoe@example.com"
+                />
+                <div class="invalid-feedback">Please provide a valid email.</div>
+              </div>
+              <div class="mb-3">
+                <label for="phone" class="form-label"
+                  >Phone <span class="text-danger">*</span></label
+                >
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  class="form-control"
+                  required
+                  value="(555) 123-4567"
+                />
+                <div class="invalid-feedback">
+                  Please provide your phone number.
+                </div>
+              </div>
+            </fieldset>
+            <!-- Department Information -->
+            <fieldset class="mb-4">
+              <legend>Department Information</legend>
+              <div class="mb-3">
+                <label for="department" class="form-label"
+                  >Department <span class="text-danger">*</span></label
+                >
+                <select id="department" name="department" class="form-select" required>
+                  <option value="" disabled>Select a department</option>
+                  <option value="Medical" selected>Medical Departments</option>
+                  <option value="Administrative">Administrative Departments</option>
+                  <option value="Support">Support/Ancillary Departments</option>
+                </select>
+                <div class="invalid-feedback">Please select a department.</div>
+              </div>
+              <!-- Sub-Department Placeholders -->
+              <div id="medicalSub" class="mb-3">
+                <label for="medicalDept" class="form-label"
+                  >Medical Sub-Department</label
+                >
+                <select id="medicalDept" name="medicalDept" class="form-select">
+                  <option value="ED" selected>Emergency Department (ED)</option>
+                  <option value="OPD">Outpatient Department (OPD)</option>
+                </select>
+              </div>
+              <div id="adminSub" class="mb-3" style="display: none;">
+                <label for="adminDept" class="form-label"
+                  >Administrative Sub-Department</label
+                >
+                <select id="adminDept" name="adminDept" class="form-select">
+                  <option value="HR">Human Resources</option>
+                  <option value="Billing">Billing and Finance</option>
+                </select>
+              </div>
+              <div id="supportSub" class="mb-3" style="display: none;">
+                <label for="supportDept" class="form-label"
+                  >Support Sub-Department</label
+                >
+                <select id="supportDept" name="supportDept" class="form-select">
+                  <option value="IT">IT/Technology</option>
+                  <option value="Security">Security</option>
+                </select>
+              </div>
+            </fieldset>
+            <!-- Issue Description -->
+            <fieldset class="mb-4">
+              <legend>Issue Description</legend>
+              <div class="mb-3">
+                <label for="issue" class="form-label"
+                  >Describe the Issue <span class="text-danger">*</span></label
+                >
+                <textarea
+                  id="issue"
+                  name="issue"
+                  class="form-control"
+                  rows="4"
+                  maxlength="250"
+                  required
+                >I am experiencing intermittent connectivity issues on my workstation.</textarea>
+                <div class="invalid-feedback">Issue description is required.</div>
+              </div>
+              <div class="mb-3">
+                <label for="screenshot" class="form-label"
+                  >Upload Screenshot (optional)</label
+                >
+                <input
+                  type="file"
+                  id="screenshot"
+                  name="screenshot"
+                  class="form-control"
+                  accept="image/*"
+                />
+                <div class="file-preview" id="filePreviewContainer">
+                  <!-- Preview will be inserted here -->
+                </div>
+              </div>
+            </fieldset>
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">
+                Submit Ticket <i class="fas fa-paper-plane ms-2"></i>
+              </button>
             </div>
-            <!-- Medical Sub-Department -->
-            <div id="medical-sub-department" class="mb-3" style="display: none;">
-              <label for="medical-department" class="form-label">Medical Sub-Department</label>
-              <select id="medical-department" name="medical-department" class="form-select">
-                <option value="ED">Emergency Department (ED)</option>
-                <option value="OPD">Outpatient Department (OPD)</option>
-                <option value="Inpatient">Inpatient Department</option>
-                <option value="Surgery">Surgery (Operating Theatres)</option>
-                <option value="ICU">Intensive Care Unit (ICU)</option>
-                <option value="Pediatrics">Pediatrics</option>
-                <option value="OB-GYN">Obstetrics and Gynecology (OB-GYN)</option>
-                <option value="Cardiology">Cardiology</option>
-                <option value="Oncology">Oncology</option>
-                <option value="Orthopedics">Orthopedics</option>
-                <option value="Neurology">Neurology</option>
-                <option value="Psychiatry">Psychiatry and Mental Health</option>
-                <option value="Dermatology">Dermatology</option>
-                <option value="Radiology">Radiology and Imaging</option>
-                <option value="Pathology">Pathology</option>
-              </select>
-            </div>
-            <!-- Administrative Sub-Department -->
-            <div id="admin-sub-department" class="mb-3" style="display: none;">
-              <label for="admin-department" class="form-label">Administrative Sub-Department</label>
-              <select id="admin-department" name="admin-department" class="form-select">
-                <option value="Admissions">Admissions and Registration</option>
-                <option value="Billing">Billing and Finance</option>
-                <option value="HR">Human Resources (HR)</option>
-                <option value="MedicalRecords">Medical Records/Health Information Management</option>
-                <option value="QualityAssurance">Quality Assurance</option>
-                <option value="PublicRelations">Public Relations/Marketing</option>
-              </select>
-            </div>
-            <!-- Support Sub-Department -->
-            <div id="support-sub-department" class="mb-3" style="display: none;">
-              <label for="support-department" class="form-label">Support Sub-Department</label>
-              <select id="support-department" name="support-department" class="form-select">
-                <option value="Pharmacy">Pharmacy</option>
-                <option value="Laboratory">Laboratory Services</option>
-                <option value="Biomedical">Biomedical Engineering</option>
-                <option value="Housekeeping">Housekeeping/Environmental Services</option>
-                <option value="Catering">Catering and Nutrition</option>
-                <option value="Security">Security</option>
-                <option value="IT">IT/Technology</option>
-                <option value="Transport">Transport Services</option>
-              </select>
-            </div>
-          </fieldset>
+          </form>
+        </div>
+      </div>
+    </section>
 
-          <!-- Issue Description Section -->
-          <fieldset class="mb-4">
-            <legend class="h5">Issue Description</legend>
-            <div class="mb-3">
-              <label for="issue" class="form-label">Describe the Issue <span class="text-danger">*</span></label>
-              <textarea id="issue" name="issue" class="form-control" rows="4" maxlength="250" required>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-              </textarea>
-              <div class="invalid-feedback">Issue description is required.</div>
-            </div>
-            <div class="mb-3">
-              <label for="screenshot" class="form-label">Upload Screenshot (optional)</label>
-              <input type="file" id="screenshot" name="screenshot" class="form-control" accept="image/*" />
-            </div>
-          </fieldset>
-
-          <!-- Submit Button -->
-          <div class="text-center">
-            <button type="submit" class="btn btn-primary">
-              Submit Ticket <i class="fas fa-paper-plane ms-2"></i>
-            </button>
+    <!-- Ticket Details & Escalation Section -->
+    <section id="detailsSection">
+      <header class="text-center mb-4">
+        <h1>Ticket Details &amp; Escalation</h1>
+      </header>
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h2 class="mb-0">Ticket Information</h2>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush mb-4" id="ticketData">
+            <!-- Ticket details injected here -->
+          </ul>
+          <div id="signatureSection">
+            <h3>Resolution Signatures</h3>
+            <div id="signatureStatus"></div>
+            <div id="escalationProcess"></div>
           </div>
-        </form>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <button id="prevTicket" class="btn btn-secondary" disabled>Previous</button>
+          <span id="paginationInfo"></span>
+          <button id="nextTicket" class="btn btn-secondary" disabled>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Escalated Timeline Section -->
+    <section id="timelineSection">
+      <header class="text-center mb-4">
+        <h1>Escalated Tickets Timeline</h1>
+      </header>
+      <div class="timeline" id="timelineContent">
+        <!-- Timeline events injected here -->
+      </div>
+    </section>
+
+    <!-- Track Tickets Section -->
+    <section id="trackingSection">
+      <header class="text-center mb-4">
+        <h1>Track Tickets</h1>
+      </header>
+      <div class="mb-3">
+        <input
+          type="text"
+          id="ticketSearch"
+          class="form-control"
+          placeholder="Search by keyword"
+        />
+      </div>
+      <div class="tracking-list" id="trackingList">
+        <!-- Open tickets injected here -->
+      </div>
+    </section>
+
+    <!-- Solved Tickets Section -->
+    <section id="solvedSection">
+      <header class="text-center mb-4">
+        <h1>Solved Tickets</h1>
+      </header>
+      <div class="solved-list" id="solvedList">
+        <!-- Solved tickets injected here -->
       </div>
     </section>
   </main>
 
   <!-- Ticket Submission Confirmation Modal -->
-  <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="ticketModal"
+    tabindex="-1"
+    aria-labelledby="ticketModalLabel"
+    aria-hidden="true"
+  >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="ticketModalLabel">Ticket Submitted</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
-        <div class="modal-body">
-          Your ticket has been successfully submitted and saved.
-        </div>
+        <div class="modal-body">Your ticket has been successfully submitted.</div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Saved Tickets Modal -->
-  <div class="modal fade" id="ticketListModal" tabindex="-1" aria-labelledby="ticketListModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="ticketListModalLabel">Saved Tickets</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="list-group" id="ticketList">
-            <!-- Dynamically generated ticket items will be injected here -->
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+            OK
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Bootstrap Bundle JS -->
-  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- External JavaScript -->
-  <script defer src="main.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  <!-- Main JS (ensure this is placed AFTER Bootstrap so that bootstrap.Modal is defined) -->
+  <script src="main.js" defer></script>
 </body>
 </html>

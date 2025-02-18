@@ -1,536 +1,372 @@
-/**************************************************
- * main.js - Centralized JavaScript for the
- * Unified IT Ticket System.
- *
- * This file handles dark mode toggling, form submissions,
- * ticket rendering, escalation, and all other interactions.
- *
- * Comments are added in simple language to explain every step.
- **************************************************/
-
-// Global variable for the current user.
-// This tells our system who you are.
-const currentUser = "UserA"; // Change to "AdminUser" to simulate admin actions.
-
-// Wait until the page (DOM) is fully loaded before running our code.
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('[INFO] Application initialized.');
-
-  /* -------------------------------
-   * Global: Dark Mode Toggle
-   * When you click the toggle button, the site switches between dark and light mode.
-   * It's like turning a light switch on and off.
-   ------------------------------- */
-  const toggleThemeBtn = document.getElementById('toggleTheme');
-  if (toggleThemeBtn) {
-    toggleThemeBtn.addEventListener('click', () => {
-      document.body.classList.toggle('light-mode');
-      if (document.body.classList.contains('light-mode')) {
-        document.body.style.backgroundColor = '#f5f5f5';
-        document.body.style.color = '#333';
-        console.log('[INFO] Switched to light mode.');
-      } else {
-        document.body.style.backgroundColor = '#121212';
-        document.body.style.color = '#e0e0e0';
-        console.log('[INFO] Switched to dark mode.');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[INFO] IT Ticket System initialized.');
+    const currentUser = "UserA"; // Use "AdminUser" to simulate admin privileges
+  
+    // Section Navigation
+    const sections = document.querySelectorAll('main > section');
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('data-target');
+        sections.forEach(sec => sec.classList.remove('active'));
+        document.getElementById(targetId).classList.add('active');
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  
+    // Dark Mode Toggle
+    const toggleBtn = document.getElementById('toggleTheme');
+    toggleBtn.addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+    });
+  
+    // Department Sub-selection Handling
+    const departmentSelect = document.getElementById('department');
+    departmentSelect.addEventListener('change', function() {
+      const dept = this.value;
+      document.getElementById('medicalSub').style.display = (dept === 'Medical') ? 'block' : 'none';
+      document.getElementById('adminSub').style.display = (dept === 'Administrative') ? 'block' : 'none';
+      document.getElementById('supportSub').style.display = (dept === 'Support') ? 'block' : 'none';
+    });
+  
+    // File Preview: When a file is chosen, display preview in the box.
+    const screenshotInput = document.getElementById('screenshot');
+    screenshotInput.addEventListener('change', function() {
+      const file = this.files[0];
+      const previewContainer = document.getElementById('filePreviewContainer');
+      previewContainer.innerHTML = ''; // Clear previous preview
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.alt = 'Screenshot Preview';
+          img.classList.add('visible');
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
       }
     });
-  }
-
-  /* -------------------------------
-   * Module 1: Sub-Department Handler (index.html)
-   * Show or hide sub-department fields based on the chosen department.
-   ------------------------------- */
-  const departmentSelect = document.getElementById('department');
-  if (departmentSelect) {
-    departmentSelect.addEventListener('change', function () {
-      const selected = this.value; // This gets the chosen department.
-      console.log('[INFO] Department selected:', selected);
-      // Show the right box or hide it if it's not needed.
-      document.getElementById('medical-sub-department').style.display = (selected === 'Medical') ? 'block' : 'none';
-      document.getElementById('admin-sub-department').style.display = (selected === 'Administrative') ? 'block' : 'none';
-      document.getElementById('support-sub-department').style.display = (selected === 'Support') ? 'block' : 'none';
-    });
-  }
-
-  /* -------------------------------
-   * Module 2: Ticket Form Submission (index.html)
-   * Check if the form is filled correctly, read the file if provided,
-   * save the ticket, and then reset the form.
-   ------------------------------- */
-  const ticketForm = document.getElementById('ticketForm');
-  if (ticketForm) {
-    ticketForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (!this.checkValidity()) {
-        this.classList.add('was-validated');
-        console.log('[WARN] Ticket form validation failed.');
+  
+    // Utility: Retrieve tickets from localStorage
+    function getTickets() {
+      return JSON.parse(localStorage.getItem('tickets')) || [];
+    }
+  
+    // Utility: Save tickets to localStorage
+    function saveTickets(tickets) {
+      localStorage.setItem('tickets', JSON.stringify(tickets));
+    }
+  
+    // Ticket Form Submission Handler
+    const ticketForm = document.getElementById('ticketForm');
+    ticketForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      // If the form is invalid, show the native validation styling and abort
+      if (!ticketForm.checkValidity()) {
+        ticketForm.classList.add('was-validated');
         return;
       }
-
-      console.log('[INFO] Ticket form submitted successfully.');
-      // Build a ticket object with all the form information.
+  
+      const formData = new FormData(ticketForm);
       const ticket = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        department: document.getElementById('department').value,
-        // Immediately Invoked Function Expression (IIFE) to get sub-department.
-        subDepartment: (function () {
-          const dept = document.getElementById('department').value;
-          if (dept === 'Medical') return document.getElementById('medical-department').value;
-          if (dept === 'Administrative') return document.getElementById('admin-department').value;
-          if (dept === 'Support') return document.getElementById('support-department').value;
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        department: formData.get('department'),
+        subDepartment: (function() {
+          if (formData.get('department') === 'Medical') return formData.get('medicalDept');
+          if (formData.get('department') === 'Administrative') return formData.get('adminDept');
+          if (formData.get('department') === 'Support') return formData.get('supportDept');
           return '';
         })(),
-        issue: document.getElementById('issue').value.trim(),
-        screenshot: null, // This will hold our file data if uploaded.
+        issue: formData.get('issue').trim(),
+        screenshot: null,
         timestamp: new Date().toISOString(),
-        signatures: {
-          sig1: true,   // This one is automatically approved.
-          sig2: false,  // This one waits for escalation.
-          sig3: false   // This one waits for final approval.
-        }
+        signatures: { sig1: true, sig2: false, sig3: false }
       };
-
-      // Check if a screenshot file is provided.
+  
+      // Handle screenshot upload if provided
       const fileInput = document.getElementById('screenshot');
-      if (fileInput && fileInput.files[0]) {
-        const reader = new FileReader(); // FileReader helps us read the file.
-        reader.onload = function (e) {
-          ticket.screenshot = e.target.result; // Save the file content in our ticket.
-          saveTicket(ticket);
-          finalizeSubmission();
+      if (fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          ticket.screenshot = e.target.result;
+          addTicket(ticket);
         };
-        reader.readAsDataURL(fileInput.files[0]); // Read file as a base64 encoded string.
+        reader.readAsDataURL(fileInput.files[0]);
       } else {
-        saveTicket(ticket);
-        finalizeSubmission();
-      }
-
-      // This function saves our ticket into local storage (like a digital filing cabinet).
-      function saveTicket(ticket) {
-        try {
-          const tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-          tickets.push(ticket);
-          localStorage.setItem('tickets', JSON.stringify(tickets));
-          console.log('[INFO] Ticket saved:', ticket);
-        } catch (error) {
-          console.error('[ERROR] Failed to save ticket:', error);
-        }
-      }
-
-      // This function resets the form and shows a confirmation modal.
-      function finalizeSubmission() {
-        ticketForm.reset();
-        ticketForm.classList.remove('was-validated');
-        // Hide sub-department fields after submission.
-        ['medical-sub-department', 'admin-sub-department', 'support-sub-department'].forEach(id => {
-          const elem = document.getElementById(id);
-          if (elem) elem.style.display = 'none';
-        });
-        const ticketModal = new bootstrap.Modal(document.getElementById('ticketModal'));
-        ticketModal.show();
-        console.log('[INFO] Ticket submission finalized. Modal displayed.');
+        addTicket(ticket);
       }
     });
-  }
-
-  /* -------------------------------
-   * Module 3: View Tickets (index.html)
-   * When a user clicks "View Saved Tickets", load tickets from local storage
-   * and show them in a modal so you can pick one to view.
-   ------------------------------- */
-  const viewTicketsLink = document.getElementById('viewTicketsLink');
-  if (viewTicketsLink) {
-    viewTicketsLink.addEventListener('click', function (event) {
-      event.preventDefault();
-      console.log('[INFO] Loading saved tickets.');
-      const ticketList = document.getElementById('ticketList');
-      ticketList.innerHTML = '';
-
-      let tickets = [];
-      try {
-        tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-      } catch (error) {
-        console.error('[ERROR] Failed to retrieve tickets:', error);
-      }
-
-      if (tickets.length === 0) {
-        ticketList.innerHTML = '<p class="text-center">No tickets found.</p>';
-      } else {
-        tickets.forEach((ticket, index) => {
-          // Create a button for each saved ticket.
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'list-group-item list-group-item-action';
-          btn.innerHTML = `<strong>${ticket.name}</strong> - ${new Date(ticket.timestamp).toLocaleString()}`;
-          // When the button is clicked, go to the ticket detail page.
-          btn.addEventListener('click', function () {
-            window.location.href = `ticket_detail.html?ticketIndex=${index}`;
-          });
-          ticketList.appendChild(btn);
-        });
-      }
-      const ticketListModal = new bootstrap.Modal(document.getElementById('ticketListModal'));
-      ticketListModal.show();
-      console.log('[INFO] Saved tickets modal displayed.');
-    });
-  }
-
-  /* -------------------------------
-   * Utility: getParameterByName
-   * This function finds a value in the URL query string by its name.
-   * Example: ?ticketIndex=2 will return "2" when you ask for "ticketIndex".
-   ------------------------------- */
-  function getParameterByName(name, url = window.location.href) {
-    // Replace special characters in the name for regex.
-    name = name.replace(/[\[\]]/g, '\\$&');
-    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-          results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, ' '));
-  }
-
-  /* -------------------------------
-   * Utility: updateTicket
-   * This function updates an existing ticket in local storage.
-   * It finds the ticket by its index and saves the new version.
-   ------------------------------- */
-  function updateTicket(index, updatedTicket) {
-    let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-    tickets[index] = updatedTicket;
-    localStorage.setItem('tickets', JSON.stringify(tickets));
-    console.log('[INFO] Ticket updated at index', index, updatedTicket);
-  }
-
-  /* -------------------------------
-   * Module 4: Ticket Detail & Escalation (ticket_detail.html)
-   * This code displays the detailed information of a ticket on its page.
-   * It also handles escalation by showing a math problem for approval.
-   * Additionally, it allows the admin to verify the ticket by answering a question.
-   ------------------------------- */
-  const ticketDetailElem = document.getElementById('ticketDetail');
-  if (ticketDetailElem) {
-    let currentIndex = parseInt(getParameterByName('ticketIndex'), 10);
-    if (isNaN(currentIndex)) { currentIndex = 0; }
-    renderTicketDetail(currentIndex);
-
-    // Pagination: Previous and Next buttons change the ticket index.
-    document.getElementById('prevTicket').addEventListener('click', function () {
-      if (currentIndex > 0) {
-        currentIndex--;
-        window.location.href = `ticket_detail.html?ticketIndex=${currentIndex}`;
-      }
-    });
-    document.getElementById('nextTicket').addEventListener('click', function () {
-      let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-      if (currentIndex < tickets.length - 1) {
-        currentIndex++;
-        window.location.href = `ticket_detail.html?ticketIndex=${currentIndex}`;
-      }
-    });
-  }
-
-  // This function renders the ticket details based on the given index.
-  // It shows all the ticket information and then calls renderSignatures() later.
-  function renderTicketDetail(index) {
-    let tickets = [];
-    try {
-      tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-    } catch (error) {
-      console.error('[ERROR] Retrieving tickets failed:', error);
-    }
-    if (index < 0 || index >= tickets.length) {
-      document.getElementById('ticketData').innerHTML = '<li class="list-group-item">Ticket not found.</li>';
-      return;
-    }
-    let ticket = tickets[index];
-
-    // Initialize signatures if they are not present.
-    if (!ticket.signatures) {
-      const submissionTime = new Date(ticket.timestamp);
-      const dueTime = new Date(submissionTime.getTime() + 12 * 60 * 60 * 1000); // 12 hours later
-      ticket.signatures = {
-        sig1: true,
-        sig2: false,
-        sig3: false,
-        dueTime: dueTime.toISOString()
-      };
-      updateTicket(index, ticket);
-    }
-
-    // Build HTML to display ticket details.
-    const ticketData = document.getElementById('ticketData');
-    let detailsHTML = `
-      <li class="list-group-item"><strong>Name:</strong> ${ticket.name}</li>
-      <li class="list-group-item"><strong>Email:</strong> ${ticket.email}</li>
-      <li class="list-group-item"><strong>Phone:</strong> ${ticket.phone}</li>
-      <li class="list-group-item"><strong>Department:</strong> ${ticket.department}</li>
-      ${ticket.subDepartment ? `<li class="list-group-item"><strong>Sub-Department:</strong> ${ticket.subDepartment}</li>` : ''}
-      <li class="list-group-item"><strong>Issue:</strong> ${ticket.issue}</li>
-    `;
-    if (ticket.screenshot) {
-      detailsHTML += `
-        <li class="list-group-item">
-          <strong>Screenshot:</strong><br>
-          <img src="${ticket.screenshot}" alt="Ticket Screenshot" class="img-fluid rounded mt-2" style="max-height:200px;">
-        </li>
-      `;
-    }
-    detailsHTML += `<li class="list-group-item"><strong>Submitted On:</strong> ${new Date(ticket.timestamp).toLocaleString()}</li>`;
-    if (ticket.signatures.dueTime) {
-      detailsHTML += `<li class="list-group-item"><strong>Fix Due By:</strong> ${new Date(ticket.signatures.dueTime).toLocaleString()}</li>`;
-    }
-    ticketData.innerHTML = detailsHTML;
-
-    // Update pagination info.
-    document.getElementById('paginationInfo').textContent = `Ticket ${index + 1} of ${tickets.length}`;
-    document.getElementById('prevTicket').disabled = (index === 0);
-    document.getElementById('nextTicket').disabled = (index === tickets.length - 1);
-
-    // Call function to render signature statuses and escalation options.
-    renderSignatures(ticket, index);
-  }
-
-  /* -------------------------------
-   * Global Variable: correctAnswer
-   * This holds the correct answer for our math problem.
-   ------------------------------- */
-  let correctAnswer = null;
-
-  /* -------------------------------
-   * Function: generateMathProblem
-   * This function creates a simple addition problem.
-   * It picks two random numbers between 1 and 10, sums them, and returns the problem as a string.
-   * The correct answer is stored in 'correctAnswer'.
-   ------------------------------- */
-  function generateMathProblem() {
-    const a = Math.floor(Math.random() * 10) + 1;
-    const b = Math.floor(Math.random() * 10) + 1;
-    correctAnswer = a + b;
-    return `What is ${a} + ${b}?`;
-  }
-
-  /* -------------------------------
-   * Function: renderSignatures
-   * This function displays the approval status of each signature and handles
-   * escalation and final approval steps.
-   * We now allow the admin to verify the ticket by answering a question.
-   ------------------------------- */
-  function renderSignatures(ticket, index) {
-    const sigStatusDiv = document.getElementById('signatureStatus');
-    const escalationDiv = document.getElementById('escalationProcess');
-    sigStatusDiv.innerHTML = '';
-    escalationDiv.innerHTML = '';
-
-    // Display Signature 1 (auto-approved).
-    sigStatusDiv.innerHTML += `<p><strong>Signature 1:</strong> Approved (Auto-assigned)</p>`;
-
-    // Handle Signature 2: Escalation step.
-    if (!ticket.signatures.sig2) {
-      sigStatusDiv.innerHTML += `<p><strong>Signature 2:</strong> Pending</p>`;
-      escalationDiv.innerHTML = `<button id="escalateBtn" class="btn btn-info">Escalate Ticket (Solve Math Problem)</button>`;
-      document.getElementById('escalateBtn').addEventListener('click', function () {
-        const mathProblem = generateMathProblem();
-        escalationDiv.innerHTML = `
-          <p>${mathProblem}</p>
-          <div class="input-group mb-3">
-            <input type="number" id="mathAnswer" class="form-control" placeholder="Your answer">
-            <button id="submitMath" class="btn btn-success">Submit Answer</button>
-          </div>
-          <div id="mathFeedback"></div>
-        `;
-        document.getElementById('submitMath').addEventListener('click', function () {
-          const userAnswer = parseInt(document.getElementById('mathAnswer').value, 10);
-          if (userAnswer === correctAnswer) {
-            ticket.signatures.sig2 = true;
-            ticket.escalatedBy = currentUser;
-            updateTicket(index, ticket);
-            let escalatedTickets = JSON.parse(localStorage.getItem('escalatedTickets')) || [];
-            escalatedTickets.push(ticket);
-            localStorage.setItem('escalatedTickets', JSON.stringify(escalatedTickets));
-            escalationDiv.innerHTML = `<p class="text-success">Signature 2 approved! Ticket escalated.</p>`;
-            console.log('[INFO] Ticket escalated:', ticket);
-            renderSignatures(ticket, index);
-          } else {
-            document.getElementById('mathFeedback').innerHTML = `<p class="text-danger">Incorrect answer. Please try again.</p>`;
-            console.log('[WARN] Incorrect answer provided for escalation.');
-          }
-        });
+  
+    // Add Ticket to localStorage
+    function addTicket(ticket) {
+      const tickets = getTickets();
+      tickets.push(ticket);
+      saveTickets(tickets);
+      console.log('[INFO] Ticket submitted:', ticket);
+  
+      // Reset form
+      ticketForm.reset();
+      ticketForm.classList.remove('was-validated');
+      ['medicalSub','adminSub','supportSub'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
       });
-    } else {
-      sigStatusDiv.innerHTML += `<p><strong>Signature 2:</strong> Approved</p>`;
+  
+      // Show success modal
+      const modalEl = document.getElementById('ticketModal');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+  
+      // Refresh the rest of the app
+      refreshAllSections();
     }
-
-    // Handle Signature 3: Final Approval step.
-    if (ticket.signatures.sig2) {
-      if (!ticket.signatures.sig3) {
-        // When the ticket is pending admin verification...
-        if (ticket.verificationPending) {
-          if (currentUser === "AdminUser") {
-            // Instead of a secret, ask the admin to verify by answering a question.
-            escalationDiv.innerHTML += `
-              <div class="admin-verification-container">
-                <p>Please answer the verification question to approve the ticket: What is 5 + 3?</p>
-                <input type="number" id="adminAnswer" class="form-control" placeholder="Your answer">
-                <button id="verifyTicketBtn" class="btn btn-warning mt-2">Verify Ticket</button>
-                <div id="adminFeedback"></div>
+  
+    // Render Ticket Details for a given index
+    function renderTicketDetail(index) {
+      const tickets = getTickets();
+      if (index < 0 || index >= tickets.length) {
+        document.getElementById('ticketData').innerHTML = '<li class="list-group-item">Ticket not found.</li>';
+        return;
+      }
+      const ticket = tickets[index];
+      // Set due time if not already set
+      if (!ticket.signatures.dueTime) {
+        const dueTime = new Date(new Date(ticket.timestamp).getTime() + 12 * 60 * 60 * 1000);
+        ticket.signatures.dueTime = dueTime.toISOString();
+        tickets[index] = ticket;
+        saveTickets(tickets);
+      }
+  
+      let detailsHTML = `
+        <li class="list-group-item"><strong>Name:</strong> ${ticket.name}</li>
+        <li class="list-group-item"><strong>Email:</strong> ${ticket.email}</li>
+        <li class="list-group-item"><strong>Phone:</strong> ${ticket.phone}</li>
+        <li class="list-group-item"><strong>Department:</strong> ${ticket.department}</li>
+        ${ticket.subDepartment ? `<li class="list-group-item"><strong>Sub-Department:</strong> ${ticket.subDepartment}</li>` : ''}
+        <li class="list-group-item"><strong>Issue:</strong> ${ticket.issue}</li>
+        ${ticket.screenshot ? `<li class="list-group-item"><img src="${ticket.screenshot}" alt="Screenshot" class="img-fluid" style="max-height:200px;"></li>` : ''}
+        <li class="list-group-item"><strong>Submitted:</strong> ${new Date(ticket.timestamp).toLocaleString()}</li>
+        <li class="list-group-item"><strong>Fix Due By:</strong> ${new Date(ticket.signatures.dueTime).toLocaleString()}</li>
+      `;
+  
+      document.getElementById('ticketData').innerHTML = detailsHTML;
+      document.getElementById('paginationInfo').textContent = `Ticket ${index + 1} of ${tickets.length}`;
+      document.getElementById('prevTicket').disabled = (index === 0);
+      document.getElementById('nextTicket').disabled = (index === tickets.length - 1);
+      renderSignatures(ticket, index);
+    }
+  
+    // Render Signatures and Escalation Process
+    function renderSignatures(ticket, index) {
+      const sigStatus = document.getElementById('signatureStatus');
+      const escalationDiv = document.getElementById('escalationProcess');
+      sigStatus.innerHTML = '';
+      escalationDiv.innerHTML = '';
+  
+      // Signature 1 is auto-approved
+      sigStatus.innerHTML += `<p><strong>Signature 1:</strong> Approved</p>`;
+  
+      // Signature 2 pending escalation
+      if (!ticket.signatures.sig2) {
+        sigStatus.innerHTML += `<p><strong>Signature 2:</strong> Pending</p>`;
+        escalationDiv.innerHTML = `<button id="escalateBtn" class="btn btn-info">Escalate Ticket</button>`;
+        document.getElementById('escalateBtn').addEventListener('click', function() {
+          // Generate a simple math problem
+          const a = Math.floor(Math.random() * 10) + 1;
+          const b = Math.floor(Math.random() * 10) + 1;
+          const correct = a + b;
+          escalationDiv.innerHTML = `
+            <p>Solve: ${a} + ${b} = ?</p>
+            <div class="input-group mb-3">
+              <input type="number" id="mathAnswer" class="form-control" placeholder="Your answer">
+              <button id="submitMath" class="btn btn-success">Submit</button>
+            </div>
+            <div id="mathFeedback"></div>
+          `;
+          document.getElementById('submitMath').addEventListener('click', function() {
+            const answer = parseInt(document.getElementById('mathAnswer').value, 10);
+            if (answer === correct) {
+              ticket.signatures.sig2 = true;
+              ticket.escalatedBy = currentUser;
+  
+              let tickets = getTickets();
+              tickets[index] = ticket;
+              saveTickets(tickets);
+  
+              let escalated = JSON.parse(localStorage.getItem('escalatedTickets')) || [];
+              ticket.escalationTime = new Date().toISOString();
+              escalated.push(ticket);
+              localStorage.setItem('escalatedTickets', JSON.stringify(escalated));
+  
+              escalationDiv.innerHTML = `<p class="text-success">Ticket escalated successfully.</p>`;
+              renderSignatures(ticket, index);
+              refreshAllSections();
+            } else {
+              document.getElementById('mathFeedback').innerHTML = `<p class="text-danger">Incorrect answer. Try again.</p>`;
+            }
+          });
+        });
+      } else {
+        sigStatus.innerHTML += `<p><strong>Signature 2:</strong> Approved</p>`;
+      }
+  
+      // Signature 3 final approval
+      if (ticket.signatures.sig2 && !ticket.signatures.sig3) {
+        escalationDiv.innerHTML += `<button id="finalApproveBtn" class="btn btn-warning mt-2">Final Approval</button>`;
+        document.getElementById('finalApproveBtn').addEventListener('click', function() {
+          ticket.signatures.sig3 = true;
+  
+          let tickets = getTickets();
+          tickets[index] = ticket;
+          saveTickets(tickets);
+  
+          let solved = JSON.parse(localStorage.getItem('solvedTickets')) || [];
+          solved.push(ticket);
+          localStorage.setItem('solvedTickets', JSON.stringify(solved));
+  
+          escalationDiv.innerHTML = `<p class="text-success">Ticket fully approved.</p>`;
+          renderSignatures(ticket, index);
+          refreshAllSections();
+        });
+      } else if (ticket.signatures.sig3) {
+        sigStatus.innerHTML += `<p><strong>Signature 3:</strong> Approved</p>`;
+      }
+    }
+  
+    // Ticket Details Pagination Navigation
+    const prevBtn = document.getElementById('prevTicket');
+    const nextBtn = document.getElementById('nextTicket');
+    prevBtn.addEventListener('click', function() {
+      const tickets = getTickets();
+      const current = parseInt(document.getElementById('paginationInfo').textContent.split(' ')[1]) - 1;
+      if (current > 0) renderTicketDetail(current - 1);
+    });
+    nextBtn.addEventListener('click', function() {
+      const tickets = getTickets();
+      const current = parseInt(document.getElementById('paginationInfo').textContent.split(' ')[1]) - 1;
+      if (current < tickets.length - 1) renderTicketDetail(current + 1);
+    });
+  
+    // Refresh all sections: Details, Timeline, Tracking, Solved
+    function refreshAllSections() {
+      const tickets = getTickets();
+      // Render first ticket if any
+      if (tickets.length > 0) {
+        renderTicketDetail(0);
+      } else {
+        document.getElementById('ticketData').innerHTML = '<li class="list-group-item">No tickets available.</li>';
+        document.getElementById('paginationInfo').textContent = '';
+      }
+  
+      // Refresh Timeline
+      let escalated = JSON.parse(localStorage.getItem('escalatedTickets')) || [];
+      let timelineHTML =
+        escalated.length === 0
+          ? '<p>No escalated tickets.</p>'
+          : escalated
+              .map(
+                ticket => `
+              <div class="timeline-item">
+                <i class="fas fa-arrow-up"></i>
+                <span><strong>${ticket.name}</strong> escalated on ${new Date(ticket.escalationTime).toLocaleString()}</span>
+              </div>
+            `
+              )
+              .join('');
+      document.getElementById('timelineContent').innerHTML = timelineHTML;
+  
+      // Refresh Tracking
+      let trackingHTML = '';
+      if (tickets.length === 0) {
+        trackingHTML = '<p>No tickets to track.</p>';
+      } else {
+        tickets.forEach(ticket => {
+          if (!ticket.signatures.sig3) {
+            trackingHTML += `
+              <div class="tracking-item">
+                <p><strong>${ticket.name}</strong></p>
+                <p>Status: ${ticket.signatures.sig2 ? 'Escalated' : 'Open'}</p>
+                <p>Submitted: ${new Date(ticket.timestamp).toLocaleString()}</p>
+                <button class="btn btn-sm btn-primary viewDetail" data-timestamp="${ticket.timestamp}">View Details</button>
               </div>
             `;
-            document.getElementById('verifyTicketBtn').addEventListener('click', function () {
-              const adminAnswer = parseInt(document.getElementById('adminAnswer').value, 10);
-              if (adminAnswer === 8) {
-                ticket.signatures.sig3 = true;
-                updateTicket(index, ticket);
-                let solvedTickets = JSON.parse(localStorage.getItem('solvedTickets')) || [];
-                solvedTickets.push(ticket);
-                localStorage.setItem('solvedTickets', JSON.stringify(solvedTickets));
-                document.getElementById('adminFeedback').innerHTML = `<p class="text-success">Ticket verified and resolved!</p>`;
-                console.log('[INFO] Ticket verified by admin:', ticket);
-                renderSignatures(ticket, index);
-              } else {
-                document.getElementById('adminFeedback').innerHTML = `<p class="text-danger">Incorrect answer. Please try again.</p>`;
-              }
-            });
-          } else {
-            escalationDiv.innerHTML += `<p class="text-info">Ticket is pending admin verification.</p>`;
           }
-        } else if (ticket.escalatedBy === currentUser && currentUser !== "AdminUser") {
-          // Allow non-admin users to send the ticket back for admin verification.
-          escalationDiv.innerHTML += `<button id="sendBackBtn" class="btn btn-secondary mt-2">Send Ticket Back for Verification</button>`;
-          document.getElementById('sendBackBtn').addEventListener('click', function () {
-            ticket.verificationPending = true;
-            updateTicket(index, ticket);
-            escalationDiv.innerHTML = `<p class="text-info">Ticket sent back for verification. Awaiting admin approval.</p>`;
-            console.log('[INFO] Ticket sent back for verification:', ticket);
-            renderSignatures(ticket, index);
-          });
-        } else {
-          // For all others, allow final approval without the verification question.
-          escalationDiv.innerHTML += `<button id="finalApprovalBtn" class="btn btn-warning mt-2">Final Approval</button>`;
-          document.getElementById('finalApprovalBtn').addEventListener('click', function () {
-            ticket.signatures.sig3 = true;
-            updateTicket(index, ticket);
-            let solvedTickets = JSON.parse(localStorage.getItem('solvedTickets')) || [];
-            solvedTickets.push(ticket);
-            localStorage.setItem('solvedTickets', JSON.stringify(solvedTickets));
-            escalationDiv.innerHTML = `<p class="text-success">Ticket fully approved and resolved!</p>`;
-            console.log('[INFO] Ticket resolved by final approval:', ticket);
-            renderSignatures(ticket, index);
-          });
-        }
-      } else {
-        sigStatusDiv.innerHTML += `<p><strong>Signature 3:</strong> Approved (Ticket Resolved)</p>`;
+        });
       }
+      document.getElementById('trackingList').innerHTML = trackingHTML;
+  
+      // Refresh Solved Tickets
+      let solved = JSON.parse(localStorage.getItem('solvedTickets')) || [];
+      let solvedHTML =
+        solved.length === 0
+          ? '<p>No solved tickets.</p>'
+          : solved
+              .map(
+                ticket => `
+              <div class="solved-item">
+                <p><strong>${ticket.name}</strong></p>
+                <p>Submitted: ${new Date(ticket.timestamp).toLocaleString()}</p>
+                <p>Resolved: ${new Date(ticket.signatures.dueTime).toLocaleString()}</p>
+              </div>
+            `
+              )
+              .join('');
+      document.getElementById('solvedList').innerHTML = solvedHTML;
     }
-  }
-
-  /* -------------------------------
-   * Module 5: Display Solved Tickets (solved_tickets.html)
-   * This function shows a list of tickets that are fully resolved.
-   ------------------------------- */
-  const solvedListElem = document.getElementById('solvedList');
-  if (solvedListElem) {
-    displaySolvedTickets();
-  }
-  function displaySolvedTickets() {
-    let solvedTickets = [];
-    try {
-      solvedTickets = JSON.parse(localStorage.getItem('solvedTickets')) || [];
-    } catch (error) {
-      console.error('[ERROR] Retrieving solved tickets failed:', error);
-    }
-    let itemsHTML = '';
-    if (solvedTickets.length === 0) {
-      itemsHTML = '<p>No solved tickets found.</p>';
-    } else {
-      solvedTickets.forEach((ticket) => {
-        itemsHTML += `
-          <div class="solved-item">
-            <p><strong>${ticket.name}</strong></p>
-            <p>Submitted: ${new Date(ticket.timestamp).toLocaleString()}</p>
-            <p>Fix Due By: ${ticket.signatures.dueTime ? new Date(ticket.signatures.dueTime).toLocaleString() : 'N/A'}</p>
-            <p>Resolved: ${ticket.signatures.sig3 ? 'Yes' : 'No'}</p>
-          </div>
-        `;
-      });
-    }
-    solvedListElem.innerHTML = `<h2>Solved Tickets</h2>` + itemsHTML;
-    console.log('[INFO] Solved tickets displayed.');
-  }
-
-  /* -------------------------------
-   * Module 6: Display Escalated Tickets Timeline (ticket_escalated.html)
-   * This function shows a timeline of tickets that have been escalated.
-   ------------------------------- */
-  const escalatedTimelineElem = document.getElementById('escalatedTimeline');
-  if (escalatedTimelineElem) {
-    displayEscalatedTimeline();
-  }
-  function displayEscalatedTimeline() {
-    let escalatedTickets = [];
-    try {
-      escalatedTickets = JSON.parse(localStorage.getItem('escalatedTickets')) || [];
-    } catch (error) {
-      console.error('[ERROR] Retrieving escalated tickets failed:', error);
-    }
-    let timelineHTML = '';
-    if (escalatedTickets.length === 0) {
-      timelineHTML = '<p>No escalated tickets found.</p>';
-    } else {
-      escalatedTickets.forEach((ticket) => {
-        // Choose arrow color based on verification status.
-        let arrowClass = ticket.verificationPending ? "arrow-yellow" : "arrow-green";
-        timelineHTML += `
-          <div class="timeline-item">
-            <i class="fas fa-arrow-up ${arrowClass}" aria-hidden="true"></i>
-            <p><strong>${ticket.name}</strong> - Escalated on: ${new Date(ticket.escalationTime).toLocaleString()}</p>
-            <p>Issue: ${ticket.issue}</p>
-          </div>
-        `;
-      });
-    }
-    escalatedTimelineElem.innerHTML = timelineHTML;
-    console.log('[INFO] Escalated timeline displayed.');
-  }
-
-  /* -------------------------------
-   * Module 7: Display Tracking Tickets (ticket_tracking.html)
-   * This function shows tickets that are still open (not fully resolved).
-   ------------------------------- */
-  const trackingTicketsElem = document.getElementById('trackingTickets');
-  if (trackingTicketsElem) {
-    displayTrackingTickets();
-  }
-  function displayTrackingTickets() {
-    let tickets = [];
-    try {
-      tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-    } catch (error) {
-      console.error('[ERROR] Retrieving tickets for tracking failed:', error);
-    }
-    let trackingHTML = '';
-    // Filter for tickets that are not resolved (Signature 3 is false).
-    const inProgressTickets = tickets.filter(ticket => !ticket.signatures || !ticket.signatures.sig3);
-    if (inProgressTickets.length === 0) {
-      trackingHTML = '<p>All tickets have been resolved.</p>';
-    } else {
-      inProgressTickets.forEach((ticket) => {
-        trackingHTML += `
-          <div class="tracking-item">
-            <p><strong>${ticket.name}</strong></p>
-            <p>Status: ${ticket.signatures && ticket.signatures.sig2 ? 'Escalated' : 'Open'}</p>
-            <p>Submitted: ${new Date(ticket.timestamp).toLocaleString()}</p>
-            ${ticket.signatures && ticket.signatures.dueTime ? `<p>Fix Due By: ${new Date(ticket.signatures.dueTime).toLocaleString()}</p>` : ''}
-          </div>
-        `;
-      });
-    }
-    trackingTicketsElem.innerHTML = trackingHTML;
-    console.log('[INFO] Tracking tickets displayed.');
-  }
-});
+  
+    refreshAllSections();
+  
+    // Tracking: View Detail from Tracking List (Event Delegation)
+    const trackingList = document.getElementById('trackingList');
+    trackingList.addEventListener('click', function(e) {
+      if (e.target.classList.contains('viewDetail')) {
+        const ts = e.target.getAttribute('data-timestamp');
+        const tickets = getTickets();
+        const index = tickets.findIndex(t => t.timestamp === ts);
+        if (index !== -1) {
+          sections.forEach(sec => sec.classList.remove('active'));
+          document.getElementById('detailsSection').classList.add('active');
+          navLinks.forEach(link => link.classList.remove('active'));
+          document
+            .querySelector('.nav-link[data-target="detailsSection"]')
+            .classList.add('active');
+          renderTicketDetail(index);
+        }
+      }
+    });
+  
+    // Tracking: Search Functionality
+    const ticketSearch = document.getElementById('ticketSearch');
+    ticketSearch.addEventListener('input', function() {
+      const query = this.value.toLowerCase();
+      const tickets = getTickets();
+      let filtered = tickets.filter(
+        ticket =>
+          ticket.name.toLowerCase().includes(query) ||
+          ticket.issue.toLowerCase().includes(query)
+      );
+      let trackingHTML = '';
+      if (filtered.length === 0) {
+        trackingHTML = '<p>No tickets match your search.</p>';
+      } else {
+        filtered.forEach(ticket => {
+          if (!ticket.signatures.sig3) {
+            trackingHTML += `
+              <div class="tracking-item">
+                <p><strong>${ticket.name}</strong></p>
+                <p>Status: ${ticket.signatures.sig2 ? 'Escalated' : 'Open'}</p>
+                <p>Submitted: ${new Date(ticket.timestamp).toLocaleString()}</p>
+                <button class="btn btn-sm btn-primary viewDetail" data-timestamp="${ticket.timestamp}">View Details</button>
+              </div>
+            `;
+          }
+        });
+      }
+      document.getElementById('trackingList').innerHTML = trackingHTML;
+    });
+  });
+  

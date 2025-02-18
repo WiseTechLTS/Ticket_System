@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unified IT Ticket System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome for iconography -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- Global Styles -->
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Dark Mode Toggle Button -->
+  <button id="toggleTheme"><i class="fas fa-adjust"></i> Toggle Theme</button>
+
+  <!-- Main container -->
+  <main class="container my-5">
+    <!-- Hero Section with Navigation Links -->
+    <header class="text-center mb-5">
+      <h1 class="display-4">Unified IT Ticket System</h1>
+      <p class="lead">Submit your IT ticket seamlessly using our modern interface.</p>
+      <nav class="mb-3">
+        <a href="#" id="viewTicketsLink">View Saved Tickets</a> &nbsp;|&nbsp;
+        <a href="ticket_escalated.html">View Escalated Tickets</a> &nbsp;|&nbsp;
+        <a href="ticket_tracking.html">Track Tickets</a>
+      </nav>
+    </header>
+
+    <!-- Ticket Submission Card -->
+    <section class="card shadow-sm">
+      <div class="card-header text-center">
+        <h2 class="mb-0">Submit an IT Ticket</h2>
+      </div>
+      <div class="card-body">
+        <form id="ticketForm" class="needs-validation" novalidate>
+          <!-- Personal Information Section -->
+          <fieldset class="mb-4">
+            <legend class="h5">Personal Information</legend>
+            <div class="mb-3">
+              <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+              <input type="text" id="name" name="name" class="form-control" placeholder="Your name" required />
+              <div class="invalid-feedback">Please provide your name.</div>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+              <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required />
+              <div class="invalid-feedback">A valid email is required.</div>
+            </div>
+            <div class="mb-3">
+              <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
+              <input type="tel" id="phone" name="phone" class="form-control" placeholder="(123) 456-7890" required />
+              <div class="invalid-feedback">Please provide your phone number.</div>
+            </div>
+          </fieldset>
+
+          <!-- Department Information Section -->
+          <fieldset class="mb-4">
+            <legend class="h5">Department Information</legend>
+            <div class="mb-3">
+              <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
+              <select id="department" name="department" class="form-select" required>
+                <option value="" disabled selected>Select a department</option>
+                <option value="Medical">Medical Departments</option>
+                <option value="Administrative">Administrative Departments</option>
+                <option value="Support">Support/Ancillary Departments</option>
+              </select>
+              <div class="invalid-feedback">Please select a department.</div>
+            </div>
+            <!-- Medical Sub-Department -->
+            <div id="medical-sub-department" class="mb-3" style="display: none;">
+              <label for="medical-department" class="form-label">Medical Sub-Department</label>
+              <select id="medical-department" name="medical-department" class="form-select">
+                <option value="ED">Emergency Department (ED)</option>
+                <option value="OPD">Outpatient Department (OPD)</option>
+                <option value="Inpatient">Inpatient Department</option>
+                <option value="Surgery">Surgery (Operating Theatres)</option>
+                <option value="ICU">Intensive Care Unit (ICU)</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="OB-GYN">Obstetrics and Gynecology (OB-GYN)</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Oncology">Oncology</option>
+                <option value="Orthopedics">Orthopedics</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Psychiatry">Psychiatry and Mental Health</option>
+                <option value="Dermatology">Dermatology</option>
+                <option value="Radiology">Radiology and Imaging</option>
+                <option value="Pathology">Pathology</option>
+              </select>
+            </div>
+            <!-- Administrative Sub-Department -->
+            <div id="admin-sub-department" class="mb-3" style="display: none;">
+              <label for="admin-department" class="form-label">Administrative Sub-Department</label>
+              <select id="admin-department" name="admin-department" class="form-select">
+                <option value="Admissions">Admissions and Registration</option>
+                <option value="Billing">Billing and Finance</option>
+                <option value="HR">Human Resources (HR)</option>
+                <option value="MedicalRecords">Medical Records/Health Information Management</option>
+                <option value="QualityAssurance">Quality Assurance</option>
+                <option value="PublicRelations">Public Relations/Marketing</option>
+              </select>
+            </div>
+            <!-- Support Sub-Department -->
+            <div id="support-sub-department" class="mb-3" style="display: none;">
+              <label for="support-department" class="form-label">Support Sub-Department</label>
+              <select id="support-department" name="support-department" class="form-select">
+                <option value="Pharmacy">Pharmacy</option>
+                <option value="Laboratory">Laboratory Services</option>
+                <option value="Biomedical">Biomedical Engineering</option>
+                <option value="Housekeeping">Housekeeping/Environmental Services</option>
+                <option value="Catering">Catering and Nutrition</option>
+                <option value="Security">Security</option>
+                <option value="IT">IT/Technology</option>
+                <option value="Transport">Transport Services</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <!-- Issue Description Section -->
+          <fieldset class="mb-4">
+            <legend class="h5">Issue Description</legend>
+            <div class="mb-3">
+              <label for="issue" class="form-label">Describe the Issue <span class="text-danger">*</span></label>
+              <textarea id="issue" name="issue" class="form-control" rows="4" maxlength="250" required>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
+              </textarea>
+              <div class="invalid-feedback">Issue description is required.</div>
+            </div>
+            <div class="mb-3">
+              <label for="screenshot" class="form-label">Upload Screenshot (optional)</label>
+              <input type="file" id="screenshot" name="screenshot" class="form-control" accept="image/*" />
+            </div>
+          </fieldset>
+
+          <!-- Submit Button -->
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary">
+              Submit Ticket <i class="fas fa-paper-plane ms-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Ticket Submission Confirmation Modal -->
+  <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="ticketModalLabel">Ticket Submitted</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Your ticket has been successfully submitted and saved.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saved Tickets Modal -->
+  <div class="modal fade" id="ticketListModal" tabindex="-1" aria-labelledby="ticketListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="ticketListModalLabel">Saved Tickets</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="list-group" id="ticketList">
+            <!-- Dynamically generated ticket items will be injected here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- External JavaScript -->
+  <script defer src="main.js"></script>
+</body>
+</html>
