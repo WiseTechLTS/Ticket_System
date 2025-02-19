@@ -56,6 +56,13 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    'http://10.10.10.6:5500',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://10.10.10.6:5500',
+]
 
 ROOT_URLCONF = 'drf_jwt_backend.urls'
 
