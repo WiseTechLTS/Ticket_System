@@ -2,34 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Unified IT Ticket System</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- Font Awesome for iconography -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <!-- Global Styles -->
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!-- Dark Mode Toggle Button -->
-  <button id="toggleTheme"><i class="fas fa-adjust"></i> Toggle Theme</button>
+  <button id="toggleTheme" class="btn btn-secondary m-3">
+    <i class="fas fa-adjust"></i> Toggle Theme
+  </button>
+
+  <!-- Connection Status -->
+  <div id="connectionStatus" class="text-center py-2"></div>
 
   <!-- Main container -->
   <main class="container my-5">
-    <!-- Hero Section with Navigation Links -->
+    <!-- Hero Section -->
     <header class="text-center mb-5">
       <h1 class="display-4">Unified IT Ticket System</h1>
       <p class="lead">Submit your IT ticket seamlessly using our modern interface.</p>
+      <!-- Navigation link for viewing saved tickets -->
       <nav class="mb-3">
-        <a href="#" id="viewTicketsLink">View Saved Tickets</a> &nbsp;|&nbsp;
-        <a href="ticket_escalated.html">View Escalated Tickets</a> &nbsp;|&nbsp;
-        <a href="ticket_tracking.html">Track Tickets</a>
+        <a href="#" id="viewTicketsLink" class="btn btn-link">View Saved Tickets</a>
       </nav>
     </header>
 
     <!-- Ticket Submission Card -->
-    <section class="card shadow-sm">
+    <section class="card shadow-sm mb-5">
       <div class="card-header text-center">
         <h2 class="mb-0">Submit an IT Ticket</h2>
       </div>
@@ -122,14 +126,13 @@
             <legend class="h5">Issue Description</legend>
             <div class="mb-3">
               <label for="issue" class="form-label">Describe the Issue <span class="text-danger">*</span></label>
-              <textarea id="issue" name="issue" class="form-control" rows="4" maxlength="250" required>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-              </textarea>
+              <textarea id="issue" name="issue" class="form-control" rows="4" maxlength="250" required></textarea>
               <div class="invalid-feedback">Issue description is required.</div>
             </div>
             <div class="mb-3">
-              <label for="screenshot" class="form-label">Upload Screenshot (optional)</label>
-              <input type="file" id="screenshot" name="screenshot" class="form-control" accept="image/*" />
+              <label for="screenshot" class="form-label">Upload Screenshot(s) (optional)</label>
+              <!-- Allow multiple file uploads -->
+              <input type="file" id="screenshot" name="screenshot" class="form-control" accept="image/*" multiple />
             </div>
           </fieldset>
 
@@ -141,6 +144,13 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
           </div>
         </form>
       </div>
+    </section>
+
+    <!-- Section: Display Tickets & Escalation Logic -->
+    <section id="ticketDisplaySection" class="mb-5">
+      <h2 class="mb-4">Saved Tickets &amp; Escalation</h2>
+      <!-- Container for dynamically populated ticket table -->
+      <div id="ticketDisplayContainer"></div>
     </section>
   </main>
 
@@ -161,30 +171,382 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
       </div>
     </div>
   </div>
-
-  <!-- Saved Tickets Modal -->
-  <div class="modal fade" id="ticketListModal" tabindex="-1" aria-labelledby="ticketListModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="ticketListModalLabel">Saved Tickets</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="list-group" id="ticketList">
-            <!-- Dynamically generated ticket items will be injected here -->
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap Bundle JS -->
   <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- External JavaScript -->
-  <script defer src="main.js"></script>
+<!-- Then your combined script tag -->
+
+<script defer>
+  /**************************************************
+   * Unified IT Ticket System - Combined JavaScript *
+   * - Async API handlers (POST, GET, DELETE) with CSRF protection
+   * - Database connectivity check
+   * - Dark Mode Toggle
+   * - Sub-Department Field Handling
+   * - Ticket Form Submission (using async POST)
+   * - Viewing Tickets (using async GET)
+   **************************************************/
+
+  // Helper: Get a cookie's value by name.
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Define the base URL for API endpoints
+  const API_BASE_URL = 'http://10.10.10.1:8000/api/ticketing';
+
+  // Capture necessary DOM elements
+  const connectionStatus = document.getElementById('connectionStatus');
+  const viewTicketsLink = document.getElementById('viewTicketsLink');
+  const ticketDisplayContainer = document.getElementById('ticketDisplayContainer');
+
+  /**
+   * Async: Checks if the backend is reachable and updates the connection status.
+   */
+  async function checkDatabaseConnectivity() {
+    try {
+      // Use the /all/ endpoint to verify connectivity
+      const response = await fetch(`${API_BASE_URL}/all/`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        console.log('Database connected. Ready to serve requests.');
+        connectionStatus.innerText = 'Database connected. Ready to serve requests.';
+        connectionStatus.classList.add('text-success');
+      } else {
+        console.error(`Database connectivity check failed: ${response.statusText}`);
+        connectionStatus.innerText = 'Database connectivity check failed.';
+        connectionStatus.classList.add('text-danger');
+      }
+    } catch (error) {
+      console.error('Error during database connectivity check:', error);
+      connectionStatus.innerText = 'Unable to connect to the database.';
+      connectionStatus.classList.add('text-danger');
+    }
+  }
+
+  /**
+   * Handles fetch responses uniformly.
+   * @param {Response} response 
+   * @returns {Promise<Object>}
+   */
+  async function handleResponse(response) {
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(`Request failed with status ${response.status}: ${errorMessage}`);
+    }
+    return await response.json();
+  }
+
+  /**
+   * Async: Posts a new ticket to the backend.
+   * @param {Object} ticketData - The ticket data to send.
+   * @returns {Promise<Object>} - The created ticket object.
+   */
+  async function postTicket(ticketData) {
+    try {
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(ticketData)
+      });
+      const result = await handleResponse(response);
+      console.log('[INFO] Ticket successfully posted:', result);
+      return result;
+    } catch (error) {
+      console.error('[ERROR] Posting ticket failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Async: Retrieves all tickets from the backend.
+   * @returns {Promise<Array>} - An array of ticket objects.
+   */
+  async function getTickets() {
+    console.log('Attempting to retrieve all tickets from the database...');
+    try {
+      const response = await fetch(`${API_BASE_URL}/all/`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const tickets = await handleResponse(response);
+      console.log('[INFO] Tickets retrieved:', tickets);
+      return tickets;
+    } catch (error) {
+      console.error('[ERROR] Getting tickets failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Async: Deletes a specific ticket by ID.
+   * @param {number|string} ticketId - The ID of the ticket to delete.
+   * @returns {Promise<boolean>}
+   */
+  async function deleteTicket(ticketId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${ticketId}/`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      });
+      if (response.ok) {
+        console.log(`[INFO] Ticket with ID ${ticketId} deleted successfully.`);
+        return true;
+      } else {
+        throw new Error(`Failed to delete ticket: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('[ERROR] Deleting ticket failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Displays tickets in a responsive, dark striped table.
+   * Each screenshot is rendered as a clickable thumbnail that opens a modal for a larger preview.
+   * @param {Array} tickets 
+   */
+  function displayTickets(tickets) {
+    // Clear any existing content
+    ticketDisplayContainer.innerHTML = '';
+
+    // Create a responsive table container
+    const tableWrapper = document.createElement('div');
+    tableWrapper.classList.add('table-responsive');
+
+    // Create the table element with dark and striped styling
+    const table = document.createElement('table');
+    table.classList.add('table', 'table-dark', 'table-striped');
+
+    // Define the table header
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Department</th>
+          <th>Issue</th>
+          <th>Screenshots</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+
+    // For each ticket, create a row with all relevant details
+    tickets.forEach((ticket, index) => {
+      console.log('Ticket Object:', ticket);
+
+      // Build screenshot previews with modals
+      let screenshotContent = 'No Image';
+      if (ticket.screenshots && ticket.screenshots.length > 0) {
+        screenshotContent = ticket.screenshots.map((url, idx) => {
+          const modalId = `screenshotModal-${ticket.id || index}-${idx}`;
+          return `
+            <div class="d-inline-block me-2">
+              <img 
+                src="${url}" 
+                alt="Screenshot" 
+                style="max-width: 50px; max-height: 50px; cursor: pointer;" 
+                class="img-thumbnail"
+                data-bs-toggle="modal" 
+                data-bs-target="#${modalId}"
+              />
+              <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                  <div class="modal-content">
+                    <img src="${url}" alt="Screenshot" class="img-fluid rounded" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${ticket.id || index + 1}</td>
+        <td>${ticket.name || 'N/A'}</td>
+        <td>${ticket.email || 'N/A'}</td>
+        <td>${ticket.phone || 'N/A'}</td>
+        <td>${ticket.department || 'N/A'}</td>
+        <td>${ticket.issue || 'No description provided.'}</td>
+        <td>${screenshotContent}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    tableWrapper.appendChild(table);
+    ticketDisplayContainer.appendChild(tableWrapper);
+  }
+
+  /***********************
+   * Main DOM Content Load
+   ***********************/
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('[INFO] Application initialized.');
+    
+    // Check backend connectivity on window load
+    window.addEventListener('load', async () => {
+      console.log('Initializing Unified IT Ticket System...');
+      await checkDatabaseConnectivity();
+    });
+
+    /* -------------------------------
+     * Dark Mode Toggle
+     ------------------------------- */
+    const toggleThemeBtn = document.getElementById('toggleTheme');
+    if (toggleThemeBtn) {
+      toggleThemeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        if (document.body.classList.contains('light-mode')) {
+          document.body.style.backgroundColor = '#f5f5f5';
+          document.body.style.color = '#333';
+          console.log('[INFO] Switched to light mode.');
+        } else {
+          document.body.style.backgroundColor = '#121212';
+          document.body.style.color = '#e0e0e0';
+          console.log('[INFO] Switched to dark mode.');
+        }
+      });
+    }
+
+    /* -------------------------------
+     * Sub-Department Handler
+     ------------------------------- */
+    const departmentSelect = document.getElementById('department');
+    if (departmentSelect) {
+      departmentSelect.addEventListener('change', function () {
+        const selected = this.value;
+        console.log('[INFO] Department selected:', selected);
+        document.getElementById('medical-sub-department').style.display =
+          selected === 'Medical' ? 'block' : 'none';
+        document.getElementById('admin-sub-department').style.display =
+          selected === 'Administrative' ? 'block' : 'none';
+        document.getElementById('support-sub-department').style.display =
+          selected === 'Support' ? 'block' : 'none';
+      });
+    }
+
+    /* -------------------------------
+     * Ticket Form Submission
+     * Uses async postTicket() for submitting the ticket.
+     * Supports multiple file uploads.
+     ------------------------------- */
+    const ticketForm = document.getElementById('ticketForm');
+    if (ticketForm) {
+      ticketForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!this.checkValidity()) {
+          this.classList.add('was-validated');
+          console.log('[WARN] Ticket form validation failed.');
+          return;
+        }
+
+        console.log('[INFO] Ticket form submitted successfully.');
+        const ticket = {
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          department: document.getElementById('department').value,
+          subDepartment: (function () {
+            const dept = document.getElementById('department').value;
+            if (dept === 'Medical') return document.getElementById('medical-department').value;
+            if (dept === 'Administrative') return document.getElementById('admin-department').value;
+            if (dept === 'Support') return document.getElementById('support-department').value;
+            return '';
+          })(),
+          issue: document.getElementById('issue').value.trim(),
+          screenshots: [],
+          timestamp: new Date().toISOString(),
+        };
+
+        // Handle multiple file uploads
+        const fileInput = document.getElementById('screenshot');
+        if (fileInput && fileInput.files.length > 0) {
+          const filePromises = [];
+          for (let i = 0; i < fileInput.files.length; i++) {
+            filePromises.push(new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                resolve(e.target.result);
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(fileInput.files[i]);
+            }));
+          }
+          try {
+            ticket.screenshots = await Promise.all(filePromises);
+          } catch (error) {
+            console.error('[ERROR] File reading failed:', error);
+          }
+        }
+
+        try {
+          await postTicket(ticket);
+          console.log('[INFO] Ticket successfully submitted to backend.');
+        } catch (error) {
+          console.error('[ERROR] Failed to submit ticket to backend:', error);
+        }
+
+        // Finalize submission: reset form, hide sub-department fields, and show confirmation modal.
+        ticketForm.reset();
+        ticketForm.classList.remove('was-validated');
+        ['medical-sub-department', 'admin-sub-department', 'support-sub-department'].forEach(id => {
+          const elem = document.getElementById(id);
+          if (elem) elem.style.display = 'none';
+        });
+        const ticketModal = new bootstrap.Modal(document.getElementById('ticketModal'));
+        ticketModal.show();
+        console.log('[INFO] Ticket submission finalized. Modal displayed.');
+      });
+    }
+
+    /* -------------------------------
+     * View Saved Tickets
+     * Uses async getTickets() to load and display tickets.
+     ------------------------------- */
+    if (viewTicketsLink) {
+      viewTicketsLink.addEventListener('click', async (event) => {
+        event.preventDefault();
+        console.log('[INFO] Loading saved tickets.');
+        try {
+          const tickets = await getTickets();
+          displayTickets(tickets);
+        } catch (error) {
+          console.error('[ERROR] Error fetching tickets:', error);
+        }
+      });
+    }
+  });
+</script>
+
+  
 </body>
 </html>
