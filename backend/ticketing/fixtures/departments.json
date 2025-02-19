@@ -1,0 +1,284 @@
+[
+    {
+        "model": "ticketing.department",
+        "fields": {
+            "code": "MED",
+            "name": "Medical Departments"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "ED",
+            "name": "Emergency Department (ED)",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "OPD",
+            "name": "Outpatient Department (OPD)",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "IP",
+            "name": "Inpatient Department",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "OR",
+            "name": "Surgery (OR)",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "ICU",
+            "name": "Intensive Care Unit (ICU)",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "PEDS",
+            "name": "Pediatrics",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "OBGYN",
+            "name": "OB-GYN",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "CARD",
+            "name": "Cardiology",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "ONC",
+            "name": "Oncology",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "ORTHO",
+            "name": "Orthopedics",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "NEURO",
+            "name": "Neurology",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "PSYCH",
+            "name": "Psychiatry and Mental Health",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "DERM",
+            "name": "Dermatology",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "RADIO",
+            "name": "Radiology and Imaging",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "MED",
+            "code": "PATH",
+            "name": "Pathology",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.department",
+        "fields": {
+            "code": "ADMIN",
+            "name": "Administrative Departments"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "ADMIN",
+            "code": "ADMISSIONS",
+            "name": "Admissions and Registration",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "ADMIN",
+            "code": "FINANCE",
+            "name": "Billing and Finance",
+            "priority": "1"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "ADMIN",
+            "code": "HR",
+            "name": "Human Resources (HR)",
+            "priority": "1"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "ADMIN",
+            "code": "RECORDS",
+            "name": "Medical Records",
+            "priority": "1"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "ADMIN",
+            "code": "QA",
+            "name": "Quality Assurance",
+            "priority": "1"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "ADMIN",
+            "code": "PR",
+            "name": "Public Relations / Marketing",
+            "priority": "1"
+        }
+    },
+    {
+        "model": "ticketing.department",
+        "fields": {
+            "code": "SUPPORT",
+            "name": "Support / Ancillary Departments"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "PHARMACY",
+            "name": "Pharmacy",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "LAB",
+            "name": "Laboratory Services",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "BIOMED",
+            "name": "Biomedical Engineering",
+            "priority": "2"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "HOUSEKEEPING",
+            "name": "Housekeeping / Environmental Services",
+            "priority": "1"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "CATERING",
+            "name": "Catering and Nutrition",
+            "priority": "1"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "SECURITY",
+            "name": "Security",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "IT",
+            "name": "IT / Technology",
+            "priority": "3"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "fields": {
+            "department": "SUPPORT",
+            "code": "TRANSPORT",
+            "name": "Transport Services",
+            "priority": "3"
+        }
+    }
+]
