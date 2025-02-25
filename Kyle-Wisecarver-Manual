@@ -1,5 +1,3 @@
-Below is the complete Markdown content. You can copy and paste this text into a file named `technical_manual.md`.
-
 ```markdown
 # Technical Manual for the Ticket System Application  
 **Repository:** [https://github.com/WiseTechLTS/Ticket_System](https://github.com/WiseTechLTS/Ticket_System)
@@ -364,15 +362,3 @@ To export this manual as a PDF, consider the following approaches:
 
 - **Online Converters:**  
   Paste the Markdown into an online converter like Dillinger or StackEdit, then export to PDF.
-```
-
----
-
-To create the Markdown file:
-
-1. Copy the above content.
-2. Open your preferred text editor.
-3. Paste the content into a new file.
-4. Save the file as `technical_manual.md`.
-
-This file is now ready for conversion to PDF using your preferred method.
