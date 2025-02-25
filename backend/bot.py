@@ -40,5 +40,5 @@ async def on_command_error(ctx, error):
         await ctx.send("❌ Unknown command. Use `!help` for available commands.")
 
 # Run the bot
-TOKEN = "MTM0MTk4ODQ0NjUyNDQxMTkwNA.GGzMFs.4v7DJyIpAEfjqCnnSMX3I0iAU902x_7Kgo5EVY"  # Replace with your bot's token
+# TOKEN = "MTM0MTk4ODQ0NjUyNDQxMTkwNA.GGzMFs.4v7DJyIpAEfjqCnnSMX3I0iAU902x_7Kgo5EVY"  # Replace with your bot's token
 bot.run(TOKEN)
