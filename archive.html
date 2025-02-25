@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archived Tickets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <header class="text-center mb-4">
+            <h1>Archived Tickets</h1>
+            <p>Viewing all fully escalated tickets.</p>
+            <a href="index.html" class="btn btn-secondary">⬅️ Back to Tickets</a>
+        </header>
+
+        <section class="row" id="archiveGrid">
+            <!-- Archived tickets will be dynamically inserted here -->
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", displayArchivedTickets);
+
+        function displayArchivedTickets() {
+            const archivedTickets = JSON.parse(localStorage.getItem("archivedTickets")) || {};
+            const grid = document.getElementById("archiveGrid");
+
+            if (Object.keys(archivedTickets).length === 0) {
+                grid.innerHTML = "<p class='text-center text-muted'>No archived tickets found.</p>";
+                return;
+            }
+
+            Object.entries(archivedTickets).forEach(([ticketId, ticketData]) => {
+                const card = document.createElement("div");
+                card.classList.add("col-md-4", "mb-4");
+
+                card.innerHTML = `
+                <div class="card border-secondary">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger">Archived Ticket #${ticketId}</h5>
+                        <p class="card-text"><strong>Status:</strong> ${ticketData.status}</p>
+                        <p class="card-text"><strong>Escalated At:</strong> ${new Date(ticketData.escalated_at).toLocaleString()}</p>
+                        <button class="btn btn-danger btn-sm" onclick="deleteArchivedTicket(${ticketId})">Delete</button>
+                    </div>
+                </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function deleteArchivedTicket(ticketId) {
+            if (confirm(`Are you sure you want to delete archived Ticket #${ticketId}?`)) {
+                let archivedTickets = JSON.parse(localStorage.getItem("archivedTickets")) || {};
+                delete archivedTickets[ticketId];
+
+                localStorage.setItem("archivedTickets", JSON.stringify(archivedTickets));
+                location.reload(); // Refresh page to update UI
+            }
+        }
+    </script>
+</body>
+
+</html>
