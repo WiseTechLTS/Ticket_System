@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Database Objects Grid</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container-fluid {
+      flex: 1;
+    }
+
+    #dataGrid {
+      margin-top: 50vh;
+      /* Pushes cards halfway down */
+    }
+
+    .sticky-header {
+      position: sticky;
+      width: 100%;
+      background: rgb(19, 77, 116);
+      z-index: 10;
+      padding: 10px 0;
+      color: white;
+    }
+
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .metatron {
+      margin-top: 25vh;
+      width: 100%;
+      height: 100%;
+    }
+
+    .row-container {
+      display: flex;
+      gap: 40px;
+      perspective: 1000px;
+    }
+
+    .cube-container {
+      width: 100%;
+      height: 150px;
+      transform-style: preserve-3d;
+      animation: spinX 5s linear infinite, spinY 5s alternate-reverse infinite;
+    }
+
+    .cube1 {
+      animation-delay: 0s;
+    }
+
+    .cube2 {
+      animation-delay: 1s;
+    }
+
+    .cube3 {
+      animation-delay: 2s;
+    }
+
+    /* Different rotational speeds */
+    @keyframes spinX {
+      0% {
+        transform: rotateX(0deg);
+      }
+
+      100% {
+        transform: rotateX(360deg);
+      }
+    }
+
+    @keyframes spinY {
+      0% {
+        transform: rotateY(0deg);
+      }
+
+      100% {
+        transform: rotateY(360deg);
+      }
+    }
+
+    .metatron {
+      width: 100%;
+      height: 100%;
+      transform-origin: center;
+    }
+
+    .layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform-origin: center;
+    }
+
+    .layer1 {
+      transform: translateZ(10px) rotateZ(0deg);
+    }
+
+    .layer2 {
+      transform: translateZ(-10px) rotateZ(180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid mb-4">
+    <header class="text-center mb-4 sticky-header">
+      <h1>Database Objects</h1>
+      <p>Displaying all objects in a responsive grid format.</p>
+      <a href="archive.html" class="btn btn-dark">View Archived Tickets</a>
+    </header>
+    <div id="metatron" class="container-fluid">
+      <section>
+        <div class="row-container">
+          <div class="cube-container cube1">
+            <div class="layer layer1">
+              <svg class="metatron" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="80" stroke="black" stroke-width="2" fill="none" />
+                <circle cx="100" cy="20" r="10" fill="black" />
+                <circle cx="100" cy="180" r="10" fill="black" />
+                <circle cx="20" cy="100" r="10" fill="black" />
+                <circle cx="180" cy="100" r="10" fill="black" />
+                <line x1="100" y1="20" x2="100" y2="180" stroke="black" stroke-width="2" />
+                <line x1="20" y1="100" x2="180" y2="100" stroke="black" stroke-width="2" />
+              </svg>
+            </div>
+            <div class="layer layer2">
+              <svg class="metatron" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="80" stroke="black" stroke-width="2" fill="none" />
+                <circle cx="50" cy="50" r="10" fill="black" />
+                <circle cx="150" cy="50" r="10" fill="black" />
+                <circle cx="50" cy="150" r="10" fill="black" />
+                <circle cx="150" cy="150" r="10" fill="black" />
+                <line x1="50" y1="50" x2="150" y2="150" stroke="black" stroke-width="2" />
+                <line x1="50" y1="150" x2="150" y2="50" stroke="black" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="cube-container cube2">
+            <div class="layer layer1">
+              <svg class="metatron" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="80" stroke="black" stroke-width="2" fill="none" />
+                <circle cx="100" cy="20" r="10" fill="black" />
+                <circle cx="100" cy="180" r="10" fill="black" />
+                <circle cx="20" cy="100" r="10" fill="black" />
+                <circle cx="180" cy="100" r="10" fill="black" />
+                <line x1="100" y1="20" x2="100" y2="180" stroke="black" stroke-width="2" />
+                <line x1="20" y1="100" x2="180" y2="100" stroke="black" stroke-width="2" />
+              </svg>
+            </div>
+            <div class="layer layer2">
+              <svg class="metatron" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="80" stroke="black" stroke-width="2" fill="none" />
+                <circle cx="50" cy="50" r="10" fill="black" />
+                <circle cx="150" cy="50" r="10" fill="black" />
+                <circle cx="50" cy="150" r="10" fill="black" />
+                <circle cx="150" cy="150" r="10" fill="black" />
+                <line x1="50" y1="50" x2="150" y2="150" stroke="black" stroke-width="2" />
+                <line x1="50" y1="150" x2="150" y2="50" stroke="black" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="cube-container cube3">
+            <div class="layer layer1">
+              <svg class="metatron" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="80" stroke="black" stroke-width="2" fill="none" />
+                <circle cx="100" cy="20" r="10" fill="black" />
+                <circle cx="100" cy="180" r="10" fill="black" />
+                <circle cx="20" cy="100" r="10" fill="black" />
+                <circle cx="180" cy="100" r="10" fill="black" />
+                <line x1="100" y1="20" x2="100" y2="180" stroke="black" stroke-width="2" />
+                <line x1="20" y1="100" x2="180" y2="100" stroke="black" stroke-width="2" />
+              </svg>
+            </div>
+            <div class="layer layer2">
+              <svg class="metatron" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="80" stroke="black" stroke-width="2" fill="none" />
+                <circle cx="50" cy="50" r="10" fill="black" />
+                <circle cx="150" cy="50" r="10" fill="black" />
+                <circle cx="50" cy="150" r="10" fill="black" />
+                <circle cx="150" cy="150" r="10" fill="black" />
+                <line x1="50" y1="50" x2="150" y2="150" stroke="black" stroke-width="2" />
+                <line x1="50" y1="150" x2="150" y2="50" stroke="black" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <section class="row" id="dataGrid">
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title text-primary">Ticket #1</h5>
+            <p class="card-text"><strong>Issue:</strong> N/A</p>
+            <p class="card-text"><strong>Priority:</strong> <span class="badge bg-secondary">N/A</span></p>
+          </div>
+        </div>
+      </div>
+      <!-- Cards will be dynamically inserted here -->
+    </section>
+  </div>
+
+  <script>
+    const API_URL = "http://10.10.10.1:8000/api/ticketing/all/";
+    const MEDIA_URL = "http://10.10.10.1:8000";
+
+    document.addEventListener("DOMContentLoaded", fetchData);
+
+    async function fetchData() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        displayData(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        document.getElementById("dataGrid").innerHTML = `
+          <p class='text-danger text-center'>⚠️ Unable to load data. Please try again later.</p>
+        `;
+      }
+    }
+
+    function displayData(items) {
+      const grid = document.getElementById("dataGrid");
+      grid.innerHTML = "";
+
+      if (!Array.isArray(items) || items.length === 0) {
+        grid.innerHTML = "<p class='text-center text-muted'>No data available.</p>";
+        return;
+      }
+
+      items.forEach(item => {
+        const card = createCard(item);
+        grid.appendChild(card);
+      });
+    }
+
+    function createPriorityBadge(priority) {
+      let badgeClass = "bg-secondary";
+      let priorityText = "";
+      if (typeof priority === "number") {
+        const priorityMap = { 1: "low", 2: "medium", 3: "high" };
+        priorityText = priorityMap[priority] || "unknown";
+      } else if (typeof priority === "string") {
+        priorityText = priority.toLowerCase();
+      } else {
+        priorityText = "N/A";
+      }
+
+      if (priorityText === "high") badgeClass = "bg-danger";
+      else if (priorityText === "medium") badgeClass = "bg-warning";
+      else if (priorityText === "low") badgeClass = "bg-success";
+
+      return `<span class="badge ${badgeClass}">${priorityText}</span>`;
+    }
+
+    function createCard(item) {
+      const card = document.createElement("div");
+      card.classList.add("col-md-4", "mb-4");
+
+      const fileContent = createFileContent(item.file);
+      const priorityBadge = createPriorityBadge(item.priority);
+
+      card.innerHTML = `
+      <div class="card">
+          ${fileContent}
+          <div class="card-body">
+              <img class="card-img-top" src="${MEDIA_URL}${item.image}" alt="${item.image_url}">
+              <h5 class="card-title text-primary">Ticket #${item.id}</h5>
+              <p class="card-text"><strong>Issue:</strong> ${item.issue || "N/A"}</p>
+              <p class="card-text"><strong>Priority:</strong> ${priorityBadge}</p>
+          </div>
+      </div>
+      `;
+      return card;
+    }
+
+    function createFileContent(filePath) {
+      if (!filePath) return "";
+      const fileExtension = filePath.split('.').pop().toLowerCase();
+      if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
+        return `<img src="${MEDIA_URL}${filePath}" class="card-img-top" alt="Attached Image">`;
+      } else {
+        return `<div class="card-body text-center"><a href="${MEDIA_URL}${filePath}" target="_blank" class="btn btn-primary">Download File</a></div>`;
+      }
+    }
+  </script>
+</body>
+
+</html>
