@@ -1,1 +1,0 @@
-# drf_jwt_backend
