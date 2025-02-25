@@ -1,0 +1,296 @@
+[
+    {
+        "model": "ticketing.department",
+        "pk": 1,
+        "fields": {
+            "code": "MED",
+            "name": "Medical"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 1,
+        "fields": {
+            "department": 1,
+            "code": "ED",
+            "name": "Emergency Department (ED)",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 2,
+        "fields": {
+            "department": 1,
+            "code": "OPD",
+            "name": "Outpatient Department (OPD)",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 3,
+        "fields": {
+            "department": 1,
+            "code": "IP",
+            "name": "Inpatient Department",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 4,
+        "fields": {
+            "department": 1,
+            "code": "OR",
+            "name": "Surgery (OR)",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 5,
+        "fields": {
+            "department": 1,
+            "code": "ICU",
+            "name": "Intensive Care Unit (ICU)",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 6,
+        "fields": {
+            "department": 1,
+            "code": "PEDS",
+            "name": "Pediatrics",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 7,
+        "fields": {
+            "department": 1,
+            "code": "OBGYN",
+            "name": "OB-GYN",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 8,
+        "fields": {
+            "department": 1,
+            "code": "CARD",
+            "name": "Cardiology",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 9,
+        "fields": {
+            "department": 1,
+            "code": "ONC",
+            "name": "Oncology",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 10,
+        "fields": {
+            "department": 1,
+            "code": "ORTHO",
+            "name": "Orthopedics",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 11,
+        "fields": {
+            "department": 1,
+            "code": "NEURO",
+            "name": "Neurology",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 12,
+        "fields": {
+            "department": 1,
+            "code": "PSYCH",
+            "name": "Psychiatry and Mental Health",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 13,
+        "fields": {
+            "department": 1,
+            "code": "DERM",
+            "name": "Dermatology",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 14,
+        "fields": {
+            "department": 1,
+            "code": "RADIO",
+            "name": "Radiology and Imaging",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 15,
+        "fields": {
+            "department": 1,
+            "code": "PATH",
+            "name": "Pathology",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.department",
+        "pk": 2,
+        "fields": {
+            "code": "ADMIN",
+            "name": "Administrative"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 16,
+        "fields": {
+            "department": 2,
+            "code": "ADMISSIONS",
+            "name": "Admissions and Registration",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 17,
+        "fields": {
+            "department": 2,
+            "code": "FINANCE",
+            "name": "Billing and Finance",
+            "priority": 1
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 18,
+        "fields": {
+            "department": 2,
+            "code": "HR",
+            "name": "Human Resources (HR)",
+            "priority": 1
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 19,
+        "fields": {
+            "department": 2,
+            "code": "RECORDS",
+            "name": "Medical Records",
+            "priority": 1
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 20,
+        "fields": {
+            "department": 2,
+            "code": "QA",
+            "name": "Quality Assurance",
+            "priority": 1
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 21,
+        "fields": {
+            "department": 2,
+            "code": "PR",
+            "name": "Public Relations / Marketing",
+            "priority": 1
+        }
+    },
+    {
+        "model": "ticketing.department",
+        "pk": 3,
+        "fields": {
+            "code": "SUPPLY",
+            "name": "Support / Ancillary"
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 22,
+        "fields": {
+            "department": 3,
+            "code": "PHARMACY",
+            "name": "Pharmacy",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 23,
+        "fields": {
+            "department": 3,
+            "code": "LAB",
+            "name": "Laboratory Services",
+            "priority": 2
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 24,
+        "fields": {
+            "department": 3,
+            "code": "HOUSEKEEPING",
+            "name": "Housekeeping / Environmental Services",
+            "priority": 1
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 25,
+        "fields": {
+            "department": 3,
+            "code": "SECURITY",
+            "name": "Security",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 26,
+        "fields": {
+            "department": 3,
+            "code": "IT",
+            "name": "IT / Technology",
+            "priority": 3
+        }
+    },
+    {
+        "model": "ticketing.subdepartment",
+        "pk": 27,
+        "fields": {
+            "department": 3,
+            "code": "TRANSPORT",
+            "name": "Transport Services",
+            "priority": 3
+        }
+    }
+]
