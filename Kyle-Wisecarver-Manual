@@ -1,0 +1,378 @@
+Below is the complete Markdown content. You can copy and paste this text into a file named `technical_manual.md`.
+
+```markdown
+# Technical Manual for the Ticket System Application  
+**Repository:** [https://github.com/WiseTechLTS/Ticket_System](https://github.com/WiseTechLTS/Ticket_System)
+
+---
+
+## Table of Contents
+
+1. Introduction  
+   1.1. Purpose and Scope  
+   1.2. Target Audience  
+2. System Architecture and Deployment Environment  
+   2.1. Full Stack Technical Overview  
+   2.2. Deployment Environment Details  
+3. Installation and Environment Setup  
+   3.1. Prerequisites  
+   3.2. Repository Cloning and Branching  
+   3.3. Dependency Management and Virtual Environments  
+4. Configuration and Customization  
+   4.1. Apache2, Django, and Environment Configuration  
+   4.2. MySQL Database Initialization and Migration  
+   4.3. Security Hardening and Environment Variables  
+5. Application Components and Data Flow  
+   5.1. Frontend: Apache2 Static File Serving  
+   5.2. Backend: Django Application Architecture  
+   5.3. API and Data Integration  
+6. Deployment Strategies  
+   6.1. Local Development and Debugging  
+   6.2. Staging and Production Environment Setup  
+   6.3. Load Balancing, Reverse Proxy, and WSGI Deployment  
+7. Testing, Monitoring, and Maintenance  
+   7.1. Unit, Integration, and End-to-End Testing Frameworks  
+   7.2. Logging, Monitoring, and Performance Tuning  
+   7.3. Maintenance Best Practices and Automated Recovery  
+8. Network and Security Considerations  
+   8.1. Hardened Ubuntu VPS, Apache2, and MySQL Security Best Practices  
+   8.2. Wireguard VPN Configuration and Subnet Management (10.10.10.1)  
+   8.3. Secure Coding Practices and Data Encryption  
+9. Future Enhancements and Scalability Roadmap  
+10. Conclusion  
+11. Appendix: PDF Export Instructions
+
+---
+
+## 1. Introduction
+
+### 1.1. Purpose and Scope
+
+This document details a technical manual for deploying and managing the Ticket System application. The manual covers system architecture, environment configuration, installation procedures, deployment strategies, and maintenance. It is engineered for professionals who require in-depth technical specifications and practical guidance on managing a full stack application deployed on a hardened Ubuntu VPS.
+
+### 1.2. Target Audience
+
+This manual is intended for system administrators, DevOps engineers, backend developers, and technical architects who demand granular details regarding system internals, secure configuration, and high-performance deployments.
+
+---
+
+## 2. System Architecture and Deployment Environment
+
+### 2.1. Full Stack Technical Overview
+
+The Ticket System application is composed of three main layers:
+
+- **Frontend:**  
+  Static HTML/CSS/JavaScript served by Apache2 from `/var/www/html/myweb/index.html`. This layer handles client-side interactions and initial HTTP(S) requests.
+  
+- **Backend:**  
+  A comprehensive Django application written in Python. The backend implements RESTful API endpoints, session management, business logic, and handles asynchronous processing where required.
+  
+- **Data Layer:**  
+  MySQL serves as the primary RDBMS for structured data. The Django ORM mediates all data operations, ensuring ACID compliance and facilitating advanced query optimization.
+
+### 2.2. Deployment Environment Details
+
+The system is hosted on a hardened Ubuntu VPS configured with the following specifications:
+
+- **Operating System:** Ubuntu (LTS release preferred for long-term support)
+- **Web Server:** Apache2, acting both as a static file server and as a reverse proxy
+- **Application Server:** Gunicorn (WSGI) serving the Django backend
+- **Database:** MySQL, configured for high availability and secured using best practices
+- **VPN:** Wireguard is installed to secure all remote administrative and API access
+- **Network Configuration:** The server operates on a dedicated subnet (10.10.10.1), enabling internal routing isolation and enhanced security segmentation
+
+---
+
+## 3. Installation and Environment Setup
+
+### 3.1. Prerequisites
+
+Ensure the following components are pre-installed and configured:
+- Hardened Ubuntu VPS with root or sudo privileges
+- Apache2 (latest stable release)
+- MySQL server (configured with secure authentication methods)
+- Python 3.8+ and pip
+- Django (installed in a virtual environment)
+- Wireguard (configured with strong cryptographic keys)
+- Git for version control
+- Essential build tools (e.g., gcc, make)
+
+### 3.2. Repository Cloning and Branching
+
+Clone the repository using Git:
+
+```bash
+git clone https://github.com/WiseTechLTS/Ticket_System.git
+cd Ticket_System
+```
+
+Ensure you check out the appropriate branch (e.g., `main` or a designated release branch):
+
+```bash
+git checkout main
+```
+
+### 3.3. Dependency Management and Virtual Environments
+
+Create and activate a Python virtual environment to isolate project dependencies:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Install the Python packages specified in `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+```
+
+If the frontend requires node-based asset compilation:
+
+```bash
+cd frontend-directory  # if applicable
+npm install
+```
+
+This controlled environment ensures repeatable builds and minimizes dependency conflicts.
+
+---
+
+## 4. Configuration and Customization
+
+### 4.1. Apache2, Django, and Environment Configuration
+
+Configure Apache2 to serve the static files and reverse proxy requests to the Django backend:
+
+**Example Apache2 Virtual Host Configuration:**
+
+```apacheconf
+<VirtualHost *:80>
+    ServerName yourdomain.com
+    DocumentRoot /var/www/html/myweb
+
+    <Directory /var/www/html/myweb>
+        Options -Indexes +FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    ProxyPass /api http://127.0.0.1:8000/api
+    ProxyPassReverse /api http://127.0.0.1:8000/api
+
+    ErrorLog ${APACHE_LOG_DIR}/ticket_system_error.log
+    CustomLog ${APACHE_LOG_DIR}/ticket_system_access.log combined
+</VirtualHost>
+```
+
+In Django’s `settings.py`, configure the following:
+
+```python
+DEBUG = False
+ALLOWED_HOSTS = ['yourdomain.com', '127.0.0.1']
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ticket_db',
+        'USER': 'dbuser',
+        'PASSWORD': 'strong_password',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+```
+
+### 4.2. MySQL Database Initialization and Migration
+
+Log into MySQL and set up the database:
+
+```sql
+CREATE DATABASE ticket_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'dbuser'@'localhost' IDENTIFIED BY 'strong_password';
+GRANT ALL PRIVILEGES ON ticket_db.* TO 'dbuser'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+Run Django migrations to initialize the schema:
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### 4.3. Security Hardening and Environment Variables
+
+Secure sensitive configuration by creating a `.env` file (not tracked in version control):
+
+```ini
+DEBUG=False
+SECRET_KEY=your_secure_secret_key
+DATABASE_NAME=ticket_db
+DATABASE_USER=dbuser
+DATABASE_PASSWORD=strong_password
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+ALLOWED_HOSTS=yourdomain.com,127.0.0.1
+```
+
+Leverage libraries such as `python-decouple` or `django-environ` to load these variables.
+
+Ensure the Ubuntu server is secured:
+- Update regularly (`apt update && apt upgrade`)
+- Configure UFW to allow only necessary ports (SSH, HTTP, HTTPS, Wireguard)
+- Harden Apache2 with SSL/TLS certificates from Let’s Encrypt
+
+---
+
+## 5. Application Components and Data Flow
+
+### 5.1. Frontend: Apache2 Static File Serving
+
+The static frontend is hosted at `/var/www/html/myweb/index.html`. This file is served directly by Apache2. Ensure the directory permissions are correctly set to prevent unauthorized modifications.
+
+### 5.2. Backend: Django Application Architecture
+
+The Django backend is structured to support:
+- **URL Routing:** Defined in `urls.py`, mapping endpoints to views.
+- **Views and Serializers:** Implemented using Django Rest Framework to provide JSON-based APIs.
+- **Business Logic:** Encapsulated within Django apps, ensuring a clean separation of concerns.
+- **Asynchronous Tasks:** Optionally integrated using Celery for time-intensive operations.
+
+### 5.3. API and Data Integration
+
+Data flows from the static frontend to the Django backend through secure RESTful API endpoints. API endpoints are versioned and documented using tools such as Swagger or Redoc. Requests are authenticated using JWT tokens, ensuring that only authorized requests are processed.
+
+---
+
+## 6. Deployment Strategies
+
+### 6.1. Local Development and Debugging
+
+During development, run the Django development server:
+
+```bash
+python manage.py runserver 127.0.0.1:8000
+```
+
+Enable detailed logging for debugging purposes. Utilize Django’s debug toolbar for real-time performance insights.
+
+### 6.2. Staging and Production Environment Setup
+
+For production, configure Gunicorn as the WSGI server:
+
+```bash
+gunicorn --workers 3 myproject.wsgi:application --bind 127.0.0.1:8000
+```
+
+Ensure Apache2 is properly set to reverse proxy to Gunicorn. Use systemd to manage the Gunicorn service:
+
+**Example systemd Service File:**
+
+```ini
+[Unit]
+Description=Gunicorn instance to serve Ticket System
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/Ticket_System
+ExecStart=/path/to/Ticket_System/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 myproject.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 6.3. Load Balancing, Reverse Proxy, and WSGI Deployment
+
+Even if the current deployment is on a single VPS, plan for scalability:
+- **Load Balancers:** Utilize HAProxy or AWS ELB if moving to a cloud infrastructure.
+- **Reverse Proxy Optimization:** Fine-tune Apache2 settings to handle high traffic loads and enable caching where applicable.
+- **Auto-Scaling Considerations:** Architect the application to support horizontal scaling by decoupling stateful sessions.
+
+---
+
+## 7. Testing, Monitoring, and Maintenance
+
+### 7.1. Testing Frameworks
+
+Adopt comprehensive testing methodologies:
+- **Unit Testing:** Use Django’s built-in test framework along with pytest.
+- **Integration Testing:** Simulate interactions between services using tools like Postman/Newman.
+- **End-to-End Testing:** Leverage Selenium or Cypress to automate full system tests.
+
+### 7.2. Logging, Monitoring, and Performance Tuning
+
+Implement robust logging using the ELK stack (Elasticsearch, Logstash, Kibana). Configure Prometheus and Grafana for real-time performance monitoring. Periodically audit system logs for anomalies.
+
+### 7.3. Maintenance Best Practices and Automated Recovery
+
+Schedule regular database backups, perform log rotations, and enforce routine security audits. Implement automated recovery scripts to handle service restarts upon failure.
+
+---
+
+## 8. Network and Security Considerations
+
+### 8.1. Hardened Ubuntu VPS, Apache2, and MySQL Security Best Practices
+
+- **Server Hardening:** Disable unused services, enforce SSH key-based authentication, and perform regular updates.
+- **Apache2 Security:** Disable directory indexing, enforce HTTPS with strong ciphers, and configure security headers.
+- **MySQL Security:** Use strong passwords, disable remote root access, and configure MySQL to listen only on localhost.
+
+### 8.2. Wireguard VPN Configuration and Subnet Management (10.10.10.1)
+
+Wireguard secures access to the server:
+- **Configuration:** Use a configuration file (e.g., `/etc/wireguard/wg0.conf`) with secure key pairs.
+- **Subnet Isolation:** The server operates on subnet 10.10.10.1. This network segmentation reduces exposure and limits lateral movement in case of compromise.
+
+### 8.3. Secure Coding Practices and Data Encryption
+
+- **Input Validation:** Rigorously validate all incoming data.
+- **Encryption:** Use TLS for all data in transit and encrypt sensitive data at rest using AES-256.
+- **Code Audits:** Regularly audit code and dependency libraries for vulnerabilities.
+
+---
+
+## 9. Future Enhancements and Scalability Roadmap
+
+- **AI-Driven Ticket Routing:** Integrate machine learning models to optimize ticket categorization.
+- **Advanced Analytics:** Expand dashboards with real-time analytics and predictive metrics.
+- **Mobile Client:** Develop native mobile applications for broader accessibility.
+- **Cloud Migration:** Architect for cloud-native deployments with container orchestration (e.g., Kubernetes) and auto-scaling.
+
+---
+
+## 10. Conclusion
+
+This manual provides a deep technical dive into the Ticket System application. With its robust full stack configuration on a hardened Ubuntu VPS using Apache2, MySQL, and a Django backend, the system is engineered for security, scalability, and high performance. Following these detailed instructions ensures that the deployment, management, and continuous improvement of the system are handled with precision and technical rigor.
+
+---
+
+## 11. Appendix: PDF Export Instructions
+
+To export this manual as a PDF, consider the following approaches:
+
+- **Using a Text Editor:**  
+  Copy and paste the document into a Markdown editor (e.g., Typora) and export as PDF.
+
+- **Command-Line Tools:**  
+  Use Pandoc to convert the Markdown file to PDF:
+  ```bash
+  pandoc technical_manual.md -o technical_manual.pdf
+  ```
+
+- **Online Converters:**  
+  Paste the Markdown into an online converter like Dillinger or StackEdit, then export to PDF.
+```
+
+---
+
+To create the Markdown file:
+
+1. Copy the above content.
+2. Open your preferred text editor.
+3. Paste the content into a new file.
+4. Save the file as `technical_manual.md`.
+
+This file is now ready for conversion to PDF using your preferred method.
