@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tickets by Department</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      padding-top: 20px;
+      background-color: #f7f9fc;
+      font-family: Arial, sans-serif;
+    }
+    .sticky-header {
+      background: rgb(19, 77, 116);
+      color: white;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .sticky-header a {
+      margin: 0 5px;
+    }
+    .action-buttons {
+      margin-top: 10px;
+    }
+    .table-container {
+      margin: 0 auto;
+      max-width: 1200px;
+    }
+    .department-header {
+      background-color: #e9ecef;
+      font-weight: bold;
+    }
+    .signature-input {
+      width: 80px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 2px;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <header class="sticky-header">
+      <h1>Tickets Organized by Department</h1>
+      <p>Tickets not yet archived are shown below.</p>
+      <div class="action-buttons">
+        <a href="kanban.html" class="btn btn-info">View Kanban Board</a>
+        <button class="btn btn-danger" onclick="archiveAllTickets()">Archive All Tickets</button>
+        <button class="btn btn-primary" onclick="fastTechSignAllTickets()">Fast Tech Sign All Tickets</button>
+      </div>
+    </header>
+    
+    <div class="table-container">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover" id="ticketsTable">
+          <thead class="table-dark">
+            <tr>
+              <th>Ticket ID</th>
+              <th>Issue</th>
+              <th>Department</th>
+              <th>Priority</th>
+              <th>Tech Signature</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Ticket rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://10.10.10.1:8000/api/ticketing/all/";
+    const MEDIA_URL = "http://10.10.10.1:8000";
+    let archivedTickets = JSON.parse(localStorage.getItem("archivedTickets")) || {};
+    let allTickets = []; // Global array to store fetched tickets
+
+    // Sample department mapping if department is provided as a number
+    const departmentMap = {
+      1: "IT",
+      2: "Support",
+      3: "Engineering",
+      4: "HR"
+    };
+
+    document.addEventListener("DOMContentLoaded", fetchData);
+
+    async function fetchData() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        allTickets = data;
+        renderTable(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        document.querySelector("#ticketsTable tbody").innerHTML = `
+          <tr><td colspan="6" class="text-center text-danger">⚠️ Unable to load data. Please try again later.</td></tr>
+        `;
+      }
+    }
+
+    function renderTable(tickets) {
+      // Filter out archived tickets
+      const activeTickets = tickets.filter(ticket => !archivedTickets[ticket.id]);
+      
+      // Group tickets by department name (if department is numeric, convert using the map)
+      const groups = activeTickets.reduce((acc, ticket) => {
+        let dept = ticket.department || "Unassigned";
+        if (!isNaN(dept)) {
+          dept = departmentMap[dept] || "Unknown Department";
+        }
+        if (!acc[dept]) acc[dept] = [];
+        acc[dept].push(ticket);
+        return acc;
+      }, {});
+
+      // Sort department names
+      const sortedDepartments = Object.keys(groups).sort();
+      const tbody = document.querySelector("#ticketsTable tbody");
+      tbody.innerHTML = "";
+
+      sortedDepartments.forEach(dept => {
+        // Add a header row for each department group
+        const deptRow = document.createElement("tr");
+        deptRow.className = "department-header";
+        deptRow.innerHTML = `<td colspan="6">${dept}</td>`;
+        tbody.appendChild(deptRow);
+
+        // For each ticket in the group, create a row
+        groups[dept].forEach(ticket => {
+          // Retrieve tech signature from localStorage; if not signed, default to "X"
+          let techSignature = localStorage.getItem(`ticket-signature-${ticket.id}`) || "X";
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${ticket.id}</td>
+            <td>${ticket.issue || "N/A"}</td>
+            <td>${ticket.department && isNaN(ticket.department) ? ticket.department : (departmentMap[ticket.department] || "Unassigned")}</td>
+            <td>${createPriorityBadge(ticket.priority)}</td>
+            <td>
+              <input type="text" id="signature-${ticket.id}" class="signature-input" value="${techSignature}" readonly />
+            </td>
+            <td>
+              <button class="btn btn-success btn-sm" onclick="techSignTicket(${ticket.id})">
+                Tech Signature
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+    }
+
+    function createPriorityBadge(priority) {
+      let badgeClass = "bg-secondary";
+      let priorityText = "";
+      if (typeof priority === "number") {
+        const priorityMap = { 1: "low", 2: "medium", 3: "high" };
+        priorityText = priorityMap[priority] || "unknown";
+      } else if (typeof priority === "string") {
+        priorityText = priority.toLowerCase();
+      } else {
+        priorityText = "N/A";
+      }
+      if (priorityText === "high") badgeClass = "bg-danger";
+      else if (priorityText === "medium") badgeClass = "bg-warning";
+      else if (priorityText === "low") badgeClass = "bg-success";
+      return `<span class="badge ${badgeClass}">${priorityText}</span>`;
+    }
+
+    // Tech Signature process: prompts for signature, defaults to "X" if left blank.
+    function techSignTicket(ticketId) {
+      const currentSignature = localStorage.getItem(`ticket-signature-${ticketId}`);
+      const userSignature = prompt("Enter your tech signature (leave blank for default 'X'):", currentSignature && currentSignature !== "X" ? currentSignature : "");
+      const signature = userSignature && userSignature.trim() !== "" ? userSignature.trim() : "X";
+      localStorage.setItem(`ticket-signature-${ticketId}`, signature);
+      // Update the signature input field
+      document.getElementById(`signature-${ticket.id || ticketId}`).value = signature;
+      alert(`Ticket #${ticketId} signed by technician: ${signature}`);
+    }
+
+    // Archive All Tickets: marks every non-archived ticket as archived and removes them from view
+    function archiveAllTickets() {
+      allTickets.forEach(ticket => {
+        if (!archivedTickets[ticket.id]) {
+          archivedTickets[ticket.id] = { status: "Archived", archived_at: new Date().toISOString() };
+          localStorage.setItem(`ticket-signature-${ticket.id}`, "Archived");
+        }
+      });
+      localStorage.setItem("archivedTickets", JSON.stringify(archivedTickets));
+      alert("All tickets have been archived.");
+      // Re-render the table to remove archived tickets
+      renderTable(allTickets);
+    }
+
+    // Fast Tech Sign All Tickets: automatically signs every non-archived ticket with "X"
+    function fastTechSignAllTickets() {
+      allTickets.forEach(ticket => {
+        if (!archivedTickets[ticket.id]) {
+          localStorage.setItem(`ticket-signature-${ticket.id}`, "X");
+          const sigEl = document.getElementById(`signature-${ticket.id}`);
+          if (sigEl) {
+            sigEl.value = "X";
+          }
+        }
+      });
+      alert("All tickets have been auto signed with 'X'.");
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
