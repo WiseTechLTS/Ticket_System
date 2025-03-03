@@ -1,0 +1,173 @@
+body {
+    background-color: #f2f7f9;
+    padding: 20px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #555;
+}
+
+.sticky-header {
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+    color: #333;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-bar-container {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.status-bar {
+    width: 300px;
+    height: 25px;
+}
+
+.ticket-counter {
+    width: 100%;
+    max-width: 400px;
+}
+
+.kanban-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.kanban-column {
+    flex: 1;
+    min-width: 250px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0;
+    /* Internal padding is in sub-elements */
+    border: 1px solid #e0e0e0;
+    min-height: 500px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-column h2 {
+    font-size: 1.1rem;
+    margin: 0;
+    padding: 15px;
+    text-align: center;
+    color: #3d3d3d;
+    background-color: #f2f7f9;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.kanban-column h2:hover {
+    background-color: #e6f0f7;
+}
+
+/* Container for the tickets in each column */
+.column-body {
+    padding: 15px;
+    flex: 1;
+    overflow-y: auto;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    position: relative;
+}
+
+/* When collapsed, show a preview height of 120px with overflow hidden */
+.column-body.collapsed {
+    max-height: 120px;
+    overflow: hidden;
+}
+
+/* Optional fade-out effect for collapsed columns */
+.column-body.collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+}
+
+.ticket-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    position: relative;
+}
+
+.ticket-card.dragging {
+    opacity: 0.5;
+}
+
+.kanban-column.drag-over {
+    background: #f1f8e9;
+    border-color: #dcedc8;
+}
+
+.ticket-thumbnail {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+}
+
+@keyframes meltOff {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+}
+
+.melt-off {
+    animation: meltOff 1s forwards;
+}
+
+/* Timer styling for each ticket (top-right corner) */
+.ticket-timer {
+    background: #333;
+    color: #fff;
+    font-size: 0.85rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+/* Highlight selected ticket cards */
+.ticket-card.selected {
+    border: 2px solid #dc3545;
+    background-color: #ffecec;
+}
+
+/* Modal Dark Table Styling */
+.table-dark thead th {
+    border-color: #444;
+}
+
+.table-dark tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}

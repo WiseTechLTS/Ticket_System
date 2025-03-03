@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ticket Kanban Board</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #f2f7f9;
+      padding: 20px;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: #555;
+    }
+    .sticky-header {
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      color: #333;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status-bar-container {
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .status-bar {
+      width: 300px;
+      height: 25px;
+    }
+    .ticket-counter {
+      width: 100%;
+      max-width: 400px;
+    }
+    .kanban-board {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .kanban-column {
+      flex: 1;
+      min-width: 250px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 0; /* Internal padding is in sub-elements */
+      border: 1px solid #e0e0e0;
+      min-height: 500px;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .kanban-column h2 {
+      font-size: 1.1rem;
+      margin: 0;
+      padding: 15px;
+      text-align: center;
+      color: #3d3d3d;
+      background-color: #f2f7f9;
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .kanban-column h2:hover {
+      background-color: #e6f0f7;
+    }
+    /* Container for the tickets in each column */
+    .column-body {
+      padding: 15px;
+      flex: 1;
+      overflow-y: auto;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      position: relative;
+    }
+    /* When collapsed, show a preview height of 120px with overflow hidden */
+    .column-body.collapsed {
+      max-height: 120px;
+      overflow: hidden;
+    }
+    /* Optional fade-out effect for collapsed columns */
+    .column-body.collapsed::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(to bottom, transparent, #fff);
+      pointer-events: none;
+    }
+    .ticket-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      cursor: grab;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      position: relative;
+    }
+    .ticket-card.dragging {
+      opacity: 0.5;
+    }
+    .kanban-column.drag-over {
+      background: #f1f8e9;
+      border-color: #dcedc8;
+    }
+    .ticket-thumbnail {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    @keyframes meltOff {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.1); }
+    }
+    .melt-off {
+      animation: meltOff 1s forwards;
+    }
+    /* Timer styling for each ticket (top-right corner) */
+    .ticket-timer {
+      background: #333;
+      color: #fff;
+      font-size: 0.85rem;
+      padding: 3px 6px;
+      border-radius: 4px;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+    }
+    /* Highlight selected ticket cards */
+    .ticket-card.selected {
+      border: 2px solid #dc3545;
+      background-color: #ffecec;
+    }
+    /* Modal Dark Table Styling */
+    .table-dark thead th {
+      border-color: #444;
+    }
+    .table-dark tbody tr:nth-of-type(odd) {
+      background-color: rgba(255,255,255,0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <!-- Header Section -->
+    <header class="sticky-header text-center p-4 mb-3 bg-light rounded">
+      <h1 class="mb-2">Ticket Kanban Board</h1>
+      <p class="lead">Easily manage and track your tickets across different stages of progress.</p>
+      
+      <!-- Select All Checkbox for multi-select deletion -->
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="selectAllCheckbox">
+        <label class="form-check-label" for="selectAllCheckbox">Select All Tickets</label>
+      </div>
+      
+      <!-- Button to open ticket table modal -->
+      <button type="button" class="btn btn-outline-secondary ms-3" data-bs-toggle="modal" data-bs-target="#ticketTableModal">
+        View Ticket Table
+      </button>
+    </header>
+
+    <!-- Database Connection & Ticket Counter Section -->
+    <div class="status-bar-container mb-4 d-flex justify-content-between align-items-center">
+      <div class="progress status-bar flex-grow-1 me-3">
+        <div id="dbStatusBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100">
+          Disconnected
+        </div>
+      </div>
+      
+      <div class="d-flex gap-3">
+        <!-- Connect/Disconnect Buttons -->
+        <button id="connectBtn" class="btn btn-primary">Connect</button>
+        <button id="disconnectBtn" class="btn btn-secondary" disabled>Disconnect</button>
+        
+        <!-- Delete Buttons -->
+        <button id="deleteSelectedBtn" class="btn btn-danger">Delete Selected</button>
+        <button id="deleteAllBtn" class="btn btn-danger">Delete All</button>
+      </div>
+    </div>
+
+    <!-- Ticket Counter Section -->
+    <div class="ticket-counter mb-4">
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+          <thead class="table-light">
+            <tr>
+              <th>Active Tickets</th>
+              <th>Archived Tickets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="activeCount">0</td>
+              <td id="archivedCount">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- The Kanban Board -->
+    <div class="kanban-board d-flex justify-content-between gap-3">
+      <!-- Kanban Column 1: Awaiting Initial Review -->
+      <div class="kanban-column flex-fill p-3 bg-light rounded" data-step="1">
+        <h3 class="text-center">Ticket Received – Awaiting Initial Review</h3>
+        <div class="column-body"></div>
+      </div>
+      
+      <!-- Kanban Column 2: Under Analysis -->
+      <div class="kanban-column flex-fill p-3 bg-light rounded" data-step="2">
+        <h3 class="text-center">Under Analysis – Escalation in Progress</h3>
+        <div class="column-body"></div>
+      </div>
+      
+      <!-- Kanban Column 3: Actioning -->
+      <div class="kanban-column flex-fill p-3 bg-light rounded" data-step="3">
+        <h3 class="text-center">Actioning – In-depth Troubleshooting</h3>
+        <div class="column-body"></div>
+      </div>
+      
+      <!-- Kanban Column 4: Archived -->
+      <div class="kanban-column flex-fill p-3 bg-light rounded" data-step="archived">
+        <h3 class="text-center">Archived – Issue Resolved and Documented</h3>
+        <div class="column-body"></div>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing Ticket Table -->
+    <div class="modal fade" id="ticketTableModal" tabindex="-1" aria-labelledby="ticketTableModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ticketTableModalLabel">Ticket Details</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-dark table-striped" id="allTicketsTable">
+                <thead>
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Title</th>
+                    <th>Issue</th>
+                    
+                    <th>Priority</th>
+                    <th>Status</th>
+
+                  </tr>
+                </thead>
+                <tbody id="allTicketsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Section -->
+  <script>
+    // -----------------------
+    // EVENT LISTENERS: Collapse/Expand Columns
+    // -----------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      const columns = document.querySelectorAll(".kanban-column");
+      columns.forEach(column => {
+        // Use h3 instead of h2 to match our markup
+        const header = column.querySelector("h3");
+        const columnBody = column.querySelector(".column-body");
+        if (header && columnBody) {
+          header.addEventListener("click", () => {
+            columnBody.classList.toggle("collapsed");
+          });
+        }
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+  <!-- <script>
+    // -----------------------
+    // GLOBALS & CONSTANTS
+    // -----------------------
+    const API_URL = "http://10.10.10.1:8000/api/tickets/all/";
+    const DELETE_ENDPOINT = "http://10.10.10.1:8000/api/tickets/"; 
+      // Expected format for deletion: http://10.10.10.1:8000/api/tickets/<ticketId>/
+    
+    // Escalation order: Only steps 1, 2, 3, and then archived.
+    // (Assuming your API returns a numeric status as a string for ticket progression.)
+    const escalationOrder = ["1", "2", "3", "archived"];
+    const columnTitles = {
+      "1": "Ticket Received – Awaiting Initial Review",
+      "2": "Under Analysis – Escalation in Progress",
+      "3": "Actioning – In-depth Troubleshooting",
+      "archived": "Archived – Issue Resolved and Documented"
+    };
+    
+    const allTickets = [];       // Stores ticket objects
+    const ticketTimers = {};     // Stores per-ticket timer IDs
+    let dbConnected = false;
+    
+    // HTML Elements
+    const dbStatusBar       = document.getElementById('dbStatusBar');
+    const connectBtn        = document.getElementById('connectBtn');
+    const disconnectBtn     = document.getElementById('disconnectBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const deleteAllBtn      = document.getElementById('deleteAllBtn');
+    const activeCountEl     = document.getElementById('activeCount');
+    const archivedCountEl   = document.getElementById('archivedCount');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    
+    // Modal table reference (ensure this element exists in your HTML)
+    const allTicketsTableBody = document.getElementById('allTicketsTableBody');
+    
+    // -----------------------
+    // EVENT LISTENERS
+    // -----------------------
+    connectBtn.addEventListener('click', connectDatabase);
+    disconnectBtn.addEventListener('click', disconnectDatabase);
+    deleteSelectedBtn.addEventListener("click", deleteSelectedTickets);
+    deleteAllBtn.addEventListener("click", deleteAllTickets);
+    selectAllCheckbox.addEventListener("change", toggleSelectAll);
+    
+    // Make columns clickable to collapse/expand (with preview)
+    document.addEventListener("DOMContentLoaded", () => {
+      const columns = document.querySelectorAll(".kanban-column");
+      columns.forEach(column => {
+        const header = column.querySelector("h2");
+        const columnBody = column.querySelector(".column-body");
+        header.addEventListener("click", () => {
+          columnBody.classList.toggle("collapsed");
+        });
+      });
+    });
+    
+    // -----------------------
+    // DATABASE CONNECTION
+    // -----------------------
+    function connectDatabase() {
+      connectBtn.disabled = true;
+      disconnectBtn.disabled = true;
+      dbStatusBar.innerText = "Connecting...";
+      dbStatusBar.classList.remove('bg-danger', 'bg-success');
+      dbStatusBar.classList.add('bg-info');
+      dbStatusBar.style.width = "50%";
+    
+      setTimeout(() => {
+        dbConnected = true;
+        localStorage.setItem("dbConnected", "true");
+        dbStatusBar.innerText = "Connected";
+        dbStatusBar.classList.remove('bg-info');
+        dbStatusBar.classList.add('bg-success');
+        dbStatusBar.style.width = "100%";
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        console.log("Database connection established.");
+        fetchTickets();
+      }, 2000);
+    }
+    
+    function disconnectDatabase() {
+      disconnectBtn.disabled = true;
+      dbStatusBar.innerText = "Disconnecting...";
+      dbStatusBar.classList.remove('bg-success', 'bg-info');
+      dbStatusBar.classList.add('bg-warning');
+      dbStatusBar.style.width = "50%";
+    
+      clearAllTicketTimers();
+    
+      setTimeout(() => {
+        dbConnected = false;
+        localStorage.setItem("dbConnected", "false");
+        dbStatusBar.innerText = "Disconnected";
+        dbStatusBar.classList.remove('bg-warning');
+        dbStatusBar.classList.add('bg-danger');
+        dbStatusBar.style.width = "0%";
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+        console.log("Database connection terminated.");
+      }, 2000);
+    }
+    
+    function clearAllTicketTimers() {
+      for (const ticketId in ticketTimers) {
+        clearTimeout(ticketTimers[ticketId]);
+      }
+      for (const key in ticketTimers) {
+        delete ticketTimers[key];
+      }
+    }
+    
+    // -----------------------
+    // FETCH & RENDER TICKETS
+    // -----------------------
+    async function fetchTickets() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+    
+        // Clear existing tickets
+        allTickets.length = 0;
+        data.forEach((ticket, index) => {
+          // Set a start time for timer display
+          ticket.startTime = Date.now();
+          // Map the ticket's status from localStorage if available,
+          // otherwise default to "1" (Ticket Received)
+          const status = localStorage.getItem(`ticket-${ticket.id}`) || "1";
+          ticket.status = status;
+          allTickets.push(ticket);
+          setTimeout(() => {
+            startEscalationTimer(ticket);
+          }, index * 1000);
+        });
+    
+        renderTickets();
+        renderTicketTable();
+        updateTicketCounters();
+        console.log("Tickets successfully fetched from the database.");
+      } catch (error) {
+        console.error("Error fetching ticket data:", error);
+      }
+    }
+    
+    function renderTickets() {
+      // Clear each column's body (assumes a container with class "column-body" exists)
+      document.querySelectorAll('.kanban-column').forEach(column => {
+        const columnBody = column.querySelector(".column-body");
+        if (columnBody) columnBody.innerHTML = "";
+      });
+      
+      allTickets.forEach(ticket => {
+        const column = document.querySelector(`.kanban-column[data-step="${ticket.status}"]`);
+        if (column) {
+          const columnBody = column.querySelector(".column-body");
+          if (columnBody) {
+            const card = createTicketCard(ticket);
+            columnBody.appendChild(card);
+          }
+        }
+      });
+    }
+    
+    // Renders the modal's dark striped table with ticket information
+    function renderTicketTable() {
+      if (!allTicketsTableBody) return;
+      allTicketsTableBody.innerHTML = "";
+      allTickets.forEach(ticket => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${ticket.id}</td>
+          <td>${ticket.first_name || "N/A"}</td>
+          <td>${ticket.last_name || "N/A"}</td>
+          <td>${ticket.email || "N/A"}</td>
+          <td>${ticket.title || "N/A"}</td>
+          <td>${ticket.issue || "N/A"}</td>
+          <td>${ticket.status}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteSingleTicket(${ticket.id})">
+              Delete
+            </button>
+          </td>
+        `;
+        allTicketsTableBody.appendChild(row);
+      });
+    }
+    
+    // Helper to delete a single ticket via modal table
+    async function deleteSingleTicket(ticketId) {
+      await removeTicketFromDB(ticketId);
+      removeTicketLocally(ticketId);
+      updateTicketCounters();
+      renderTicketTable();
+      renderTickets();
+    }
+    
+    function createTicketCard(ticket) {
+      const card = document.createElement("div");
+      card.className = "ticket-card";
+      card.draggable = true;
+      card.id = `ticket-${ticket.id}`;
+    
+      // Timer display in the top-right corner
+      const timerDiv = document.createElement("div");
+      timerDiv.className = "ticket-timer";
+      timerDiv.innerText = "00:00";
+      card.appendChild(timerDiv);
+    
+      // Construct the image URL – if no image, a fallback can be used
+      const MEDIA_URL = "http://10.10.10.1:8000";
+      const thumbnailSrc = ticket.image ? MEDIA_URL + ticket.image : "/static/default_thumbnail.jpg";
+    
+      const detailsDiv = document.createElement("div");
+      detailsDiv.innerHTML = `
+        <img src="${thumbnailSrc}" alt="Ticket Image" class="ticket-thumbnail">
+        <strong>${ticket.title || "No Title"}</strong><br>
+        <small><b>First Name:</b> ${ticket.first_name || "N/A"}</small><br>
+        <small><b>Last Name:</b> ${ticket.last_name || "N/A"}</small><br>
+        <small><b>Email:</b> ${ticket.email || "N/A"}</small><br>
+        <small><b>Issue:</b> ${ticket.issue || "N/A"}</small><br>
+        <small><b>Priority:</b> ${formatPriority(ticket)}</small>
+      `;
+      card.appendChild(detailsDiv);
+    
+      // Checkbox for selection
+      const checkDiv = document.createElement("div");
+      checkDiv.className = "form-check ms-auto mt-2";
+      checkDiv.innerHTML = `<input class="form-check-input ticket-checkbox" type="checkbox" data-id="${ticket.id}">`;
+      card.appendChild(checkDiv);
+    
+      card.addEventListener("dragstart", handleDragStart);
+      card.addEventListener("dragend", handleDragEnd);
+    
+      const checkbox = checkDiv.querySelector(".ticket-checkbox");
+      checkbox.addEventListener("change", () => {
+        card.classList.toggle("selected", checkbox.checked);
+      });
+    
+      return card;
+    }
+    
+    // Use ticket.sub_department.priority.description if available.
+    function formatPriority(ticket) {
+      if (ticket.sub_department && ticket.sub_department.priority) {
+        return ticket.sub_department.priority.description;
+      }
+      // Fallback: if priority is provided as a number (1,2,3)
+      if (typeof ticket.priority === "number") {
+        const map = { 1: "Level 1 (Lowest)", 2: "Level 2 (Medium)", 3: "Level 3 (Highest)" };
+        return map[ticket.priority] || "N/A";
+      }
+      return "N/A";
+    }
+    
+    // -----------------------
+    // TIMER UPDATES
+    // -----------------------
+    function updateTicketTimers() {
+      const now = Date.now();
+      allTickets.forEach(ticket => {
+        const elapsedSeconds = Math.floor((now - ticket.startTime) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+        const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+        const timerText = `${minutes}:${seconds}`;
+        const card = document.getElementById(`ticket-${ticket.id}`);
+        if (card) {
+          const timerDiv = card.querySelector(".ticket-timer");
+          if (timerDiv) {
+            timerDiv.innerText = timerText;
+          }
+        }
+      });
+    }
+    setInterval(updateTicketTimers, 1000);
+    
+    // -----------------------
+    // TICKET ESCALATION
+    // -----------------------
+    function startEscalationTimer(ticket) {
+      if (!dbConnected || ticket.status === "archived") return;
+      const escalationIndex = escalationOrder.indexOf(ticket.status);
+      if (escalationIndex !== -1 && escalationIndex < escalationOrder.length - 1) {
+        const nextStatus = escalationOrder[escalationIndex + 1];
+        ticketTimers[ticket.id] = setTimeout(() => {
+          updateTicketStatus(ticket.id, nextStatus);
+          renderTickets();
+          renderTicketTable();
+          if (ticket.status !== "archived") {
+            startEscalationTimer(ticket);
+          }
+        }, getRandomEscalationTime());
+      }
+    }
+    
+    function getRandomEscalationTime() {
+      return Math.floor(Math.random() * 5000) + 10000;
+    }
+    
+    function updateTicketStatus(ticketId, newStatus) {
+      const ticket = allTickets.find(t => t.id.toString() === ticketId.toString());
+      if (ticket) {
+        ticket.status = newStatus;
+        localStorage.setItem(`ticket-${ticket.id}`, newStatus);
+        console.log(`Ticket #${ticket.id} escalated to ${newStatus}`);
+      }
+      if (newStatus === "archived") {
+        const card = document.getElementById(`ticket-${ticketId}`);
+        if (card) {
+          card.classList.add("melt-off");
+          setTimeout(() => { card.remove(); }, 1000);
+        }
+      }
+      updateTicketCounters();
+    }
+    
+    // -----------------------
+    // TICKET DELETION
+    // -----------------------
+    async function removeTicketFromDB(ticketId) {
+      try {
+        const response = await fetch(`${DELETE_ENDPOINT}${ticketId}/`, {
+          method: "DELETE"
+        });
+        if (response.ok) {
+          console.log(`Ticket #${ticketId} successfully deleted from the database.`);
+        } else {
+          console.error(`Failed to delete ticket #${ticketId}. Status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`Error deleting ticket #${ticketId}:`, error);
+      }
+    }
+    
+    async function deleteSelectedTickets() {
+      console.log("Delete Selected button pressed");
+      const selectedCheckboxes = document.querySelectorAll(".ticket-checkbox:checked");
+      console.log("Selected checkboxes count:", selectedCheckboxes.length);
+      if (selectedCheckboxes.length === 0) {
+        alert("No tickets selected for deletion.");
+        return;
+      }
+      for (const checkbox of selectedCheckboxes) {
+        const ticketId = checkbox.dataset.id;
+        console.log("Deleting ticket with ID:", ticketId);
+        await removeTicketFromDB(ticketId);
+        removeTicketLocally(ticketId);
+      }
+      updateTicketCounters();
+      renderTicketTable();
+      renderTickets();
+    }
+    
+    async function deleteAllTickets() {
+      if (!confirm("Are you sure you want to delete ALL tickets?")) return;
+      for (const ticket of [...allTickets]) {
+        await removeTicketFromDB(ticket.id);
+        removeTicketLocally(ticket.id);
+      }
+      updateTicketCounters();
+      renderTicketTable();
+      renderTickets();
+      console.log("All tickets have been successfully deleted from the database.");
+    }
+    
+    function removeTicketLocally(ticketId) {
+      const index = allTickets.findIndex(ticket => ticket.id.toString() === ticketId);
+      if (index > -1) {
+        allTickets.splice(index, 1);
+      }
+      const cardElement = document.getElementById(`ticket-${ticketId}`);
+      if (cardElement) {
+        cardElement.remove();
+      }
+      localStorage.removeItem(`ticket-${ticketId}`);
+    }
+    
+    // -----------------------
+    // TICKET COUNTERS
+    // -----------------------
+    function updateTicketCounters() {
+      const activeTickets = allTickets.filter(ticket => ticket.status !== "archived").length;
+      const archivedTickets = allTickets.filter(ticket => ticket.status === "archived").length;
+      activeCountEl.innerText = activeTickets;
+      archivedCountEl.innerText = archivedTickets;
+    }
+    
+    // -----------------------
+    // DRAG & DROP LOGIC
+    // -----------------------
+    let draggedCard = null;
+    function handleDragStart(e) {
+      draggedCard = this;
+      this.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", this.id);
+    }
+    function handleDragEnd() {
+      this.classList.remove("dragging");
+      draggedCard = null;
+    }
+    
+    function initializeDragAndDrop() {
+      const columns = document.querySelectorAll(".kanban-column");
+      columns.forEach(column => {
+        column.addEventListener("dragover", handleDragOver);
+        column.addEventListener("dragenter", handleDragEnter);
+        column.addEventListener("dragleave", handleDragLeave);
+        column.addEventListener("drop", handleDrop);
+      });
+    }
+    function handleDragOver(e) { e.preventDefault(); }
+    function handleDragEnter(e) {
+      e.preventDefault();
+      this.classList.add("drag-over");
+    }
+    function handleDragLeave() {
+      this.classList.remove("drag-over");
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      this.classList.remove("drag-over");
+      const ticketId = e.dataTransfer.getData("text/plain");
+      const ticketElement = document.getElementById(ticketId);
+      const newStatus = this.getAttribute("data-step");
+      const columnBody = this.querySelector(".column-body");
+      columnBody.appendChild(ticketElement);
+      updateTicketStatus(ticketId, newStatus);
+      renderTicketTable();
+    }
+    
+    // -----------------------
+    // SELECTION FUNCTIONALITY
+    // -----------------------
+    function toggleSelectAll() {
+      const checkboxes = document.querySelectorAll(".ticket-checkbox");
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+        const card = document.getElementById(`ticket-${checkbox.dataset.id}`);
+        if (card) {
+          card.classList.toggle("selected", checkbox.checked);
+        }
+      });
+    }
+    
+    // -----------------------
+    // PERSIST CONNECTION STATE ON LOAD
+    // -----------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      initializeDragAndDrop();
+      if (localStorage.getItem("dbConnected") === "true") {
+        dbConnected = true;
+        dbStatusBar.innerText = "Connected";
+        dbStatusBar.classList.remove('bg-danger', 'bg-info', 'bg-warning');
+        dbStatusBar.classList.add('bg-success');
+        dbStatusBar.style.width = "100%";
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        console.log("Persisted connection state: Connected");
+        fetchTickets();
+      }
+    });
+  </script> -->
+  <script>
+    // -----------------------
+    // GLOBALS & CONSTANTS
+    // -----------------------
+    const API_URL = "http://10.10.10.1:8000/api/ticketing/all/";
+    const DELETE_ENDPOINT = "http://10.10.10.1:8000/api/ticketing/"; 
+      // Expected format: http://10.10.10.1:8000/api/tickets/<ticketId>/
+    
+    // Escalation order: Only steps 1, 2, 3, and then archived.
+    const escalationOrder = ["1", "2", "3", "archived"];
+    const columnTitles = {
+      "1": "Ticket Received – Awaiting Initial Review",
+      "2": "Under Analysis – Escalation in Progress",
+      "3": "Actioning – In-depth Troubleshooting",
+      "archived": "Archived – Issue Resolved and Documented"
+    };
+    
+    const allTickets = [];       // Stores ticket objects
+    const ticketTimers = {};     // Stores per-ticket timer IDs
+    let dbConnected = false;
+    
+    // HTML Elements
+    const dbStatusBar       = document.getElementById('dbStatusBar');
+    const connectBtn        = document.getElementById('connectBtn');
+    const disconnectBtn     = document.getElementById('disconnectBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const deleteAllBtn      = document.getElementById('deleteAllBtn');
+    const activeCountEl     = document.getElementById('activeCount');
+    const archivedCountEl   = document.getElementById('archivedCount');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    
+    // Modal table reference (ensure this element exists in your HTML)
+    const allTicketsTableBody = document.getElementById('allTicketsTableBody');
+    
+    // -----------------------
+    // EVENT LISTENERS
+    // -----------------------
+    connectBtn.addEventListener('click', connectDatabase);
+    disconnectBtn.addEventListener('click', disconnectDatabase);
+    deleteSelectedBtn.addEventListener("click", deleteSelectedTickets);
+    deleteAllBtn.addEventListener("click", deleteAllTickets);
+    selectAllCheckbox.addEventListener("change", toggleSelectAll);
+    
+    // Make columns clickable to collapse/expand (with preview)
+    document.addEventListener("DOMContentLoaded", () => {
+      const columns = document.querySelectorAll(".kanban-column");
+      columns.forEach(column => {
+        const header = column.querySelector("h2");
+        const columnBody = column.querySelector(".column-body");
+        header.addEventListener("click", () => {
+          columnBody.classList.toggle("collapsed");
+        });
+      });
+    });
+    
+    // -----------------------
+    // DATABASE CONNECTION
+    // -----------------------
+    function connectDatabase() {
+      connectBtn.disabled = true;
+      disconnectBtn.disabled = true;
+      dbStatusBar.innerText = "Connecting...";
+      dbStatusBar.classList.remove('bg-danger', 'bg-success');
+      dbStatusBar.classList.add('bg-info');
+      dbStatusBar.style.width = "50%";
+    
+      setTimeout(() => {
+        dbConnected = true;
+        localStorage.setItem("dbConnected", "true");
+        dbStatusBar.innerText = "Connected";
+        dbStatusBar.classList.remove('bg-info');
+        dbStatusBar.classList.add('bg-success');
+        dbStatusBar.style.width = "100%";
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        console.log("Database connection established.");
+        fetchTickets();
+      }, 2000);
+    }
+    
+    function disconnectDatabase() {
+      disconnectBtn.disabled = true;
+      dbStatusBar.innerText = "Disconnecting...";
+      dbStatusBar.classList.remove('bg-success', 'bg-info');
+      dbStatusBar.classList.add('bg-warning');
+      dbStatusBar.style.width = "50%";
+    
+      clearAllTicketTimers();
+    
+      setTimeout(() => {
+        dbConnected = false;
+        localStorage.setItem("dbConnected", "false");
+        dbStatusBar.innerText = "Disconnected";
+        dbStatusBar.classList.remove('bg-warning');
+        dbStatusBar.classList.add('bg-danger');
+        dbStatusBar.style.width = "0%";
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+        console.log("Database connection terminated.");
+      }, 2000);
+    }
+    
+    function clearAllTicketTimers() {
+      for (const ticketId in ticketTimers) {
+        clearTimeout(ticketTimers[ticketId]);
+      }
+      for (const key in ticketTimers) {
+        delete ticketTimers[key];
+      }
+    }
+    
+    // -----------------------
+    // FETCH & RENDER TICKETS
+    // -----------------------
+    async function fetchTickets() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+    
+        // Clear existing tickets
+        allTickets.length = 0;
+        data.forEach((ticket, index) => {
+          ticket.startTime = Date.now(); // For timer
+          const status = localStorage.getItem(`ticket-${ticket.id}`) || "1";
+          ticket.status = status;
+          allTickets.push(ticket);
+          setTimeout(() => {
+            startEscalationTimer(ticket);
+          }, index * 1000);
+        });
+    
+        renderTickets();
+        renderTicketTable();
+        updateTicketCounters();
+        console.log("Tickets successfully fetched from the database.");
+      } catch (error) {
+        console.error("Error fetching ticket data:", error);
+      }
+    }
+    
+    function renderTickets() {
+      document.querySelectorAll('.kanban-column').forEach(column => {
+        const columnBody = column.querySelector(".column-body");
+        if (columnBody) columnBody.innerHTML = "";
+      });
+      
+      allTickets.forEach(ticket => {
+        const column = document.querySelector(`.kanban-column[data-step="${ticket.status}"]`);
+        if (column) {
+          const columnBody = column.querySelector(".column-body");
+          if (columnBody) {
+            const card = createTicketCard(ticket);
+            columnBody.appendChild(card);
+          }
+        }
+      });
+    }
+    
+    // Renders the modal's dark striped table with ticket information
+    function renderTicketTable() {
+      if (!allTicketsTableBody) return;
+      allTicketsTableBody.innerHTML = "";
+      allTickets.forEach(ticket => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${ticket.id}</td>
+          <td>${ticket.name || "N/A"}</td>
+
+          <td>${ticket.email || "N/A"}</td>
+          <td>${ticket.issue || "N/A"}</td>
+          <td>${ticket.priority}</td>
+          <td>${ticket.status}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteSingleTicket(${ticket.id})">
+              Delete
+            </button>
+          </td>
+        `;
+        allTicketsTableBody.appendChild(row);
+      });
+    }
+    
+    // Helper to delete a single ticket via modal table
+    async function deleteSingleTicket(ticketId) {
+      await removeTicketFromDB(ticketId);
+      removeTicketLocally(ticketId);
+      updateTicketCounters();
+      // Update the modal table without a full refresh
+      if (allTicketsTableBody) {
+        renderTicketTable();
+      }
+      // Also update the kanban board without reloading the entire page
+      renderTickets();
+    }
+    
+    function createTicketCard(ticket) {
+      const card = document.createElement("div");
+      card.className = "ticket-card";
+      card.draggable = true;
+      card.id = `ticket-${ticket.id}`;
+    
+      // Timer in the top-right corner
+      const timerDiv = document.createElement("div");
+      timerDiv.className = "ticket-timer";
+      timerDiv.innerText = "00:00";
+      card.appendChild(timerDiv);
+    
+      const MEDIA_URL = "http://10.10.10.1:8000";
+      const thumbnailSrc = ticket.image ? MEDIA_URL + ticket.image : "/static/default_thumbnail.jpg";
+    
+      const detailsDiv = document.createElement("div");
+      detailsDiv.innerHTML = `
+        <img src="${thumbnailSrc}" alt="Ticket Image" class="ticket-thumbnail">
+        <small><b>Name:</b> ${ticket.name || "N/A"}</small><br>
+        <small><b>Email:</b> ${ticket.email || "N/A"}</small><br>
+        <strong>${ticket.title || "No Title"}</strong><br>
+        <small><b>Issue:</b> ${ticket.issue || "N/A"}</small><br>
+        <small><b>Priority:</b> ${ticket.priority}</small>
+      `;
+      card.appendChild(detailsDiv);
+    
+      // Checkbox for selection
+      const checkDiv = document.createElement("div");
+      checkDiv.className = "form-check ms-auto mt-2";
+      checkDiv.innerHTML = `<input class="form-check-input ticket-checkbox" type="checkbox" data-id="${ticket.id}">`;
+      card.appendChild(checkDiv);
+    
+      card.addEventListener("dragstart", handleDragStart);
+      card.addEventListener("dragend", handleDragEnd);
+    
+      const checkbox = checkDiv.querySelector(".ticket-checkbox");
+      checkbox.addEventListener("change", () => {
+        card.classList.toggle("selected", checkbox.checked);
+      });
+    
+      return card;
+    }
+    
+        
+    // -----------------------
+    // TIMER UPDATES
+    // -----------------------
+    function updateTicketTimers() {
+      const now = Date.now();
+      allTickets.forEach(ticket => {
+        const elapsedSeconds = Math.floor((now - ticket.startTime) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+        const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+        const timerText = `${minutes}:${seconds}`;
+        const card = document.getElementById(`ticket-${ticket.id}`);
+        if (card) {
+          const timerDiv = card.querySelector(".ticket-timer");
+          if (timerDiv) {
+            timerDiv.innerText = timerText;
+          }
+        }
+      });
+    }
+    setInterval(updateTicketTimers, 1000);
+    
+    // -----------------------
+    // TICKET ESCALATION
+    // -----------------------
+    function startEscalationTimer(ticket) {
+      if (!dbConnected || ticket.status === "archived") return;
+      const escalationIndex = escalationOrder.indexOf(ticket.status);
+      if (escalationIndex !== -1 && escalationIndex < escalationOrder.length - 1) {
+        const nextStatus = escalationOrder[escalationIndex + 1];
+        ticketTimers[ticket.id] = setTimeout(() => {
+          updateTicketStatus(ticket.id, nextStatus);
+          // Update only the affected ticket without full page re-render
+          const card = document.getElementById(`ticket-${ticket.id}`);
+          if (card) {
+            // Optionally update the card styling or content here
+            card.classList.add("updated");
+          }
+          if (ticket.status !== "archived") {
+            startEscalationTimer(ticket);
+          }
+        }, getRandomEscalationTime());
+      }
+    }
+    
+    function getRandomEscalationTime() {
+      return Math.floor(Math.random() * 5000) + 10000;
+    }
+    
+    function updateTicketStatus(ticketId, newStatus) {
+      const ticket = allTickets.find(t => t.id.toString() === ticketId.toString());
+      if (ticket) {
+        ticket.status = newStatus;
+        localStorage.setItem(`ticket-${ticket.id}`, newStatus);
+        console.log(`Ticket #${ticket.id} escalated to ${newStatus}`);
+      }
+      if (newStatus === "archived") {
+        const card = document.getElementById(`ticket-${ticketId}`);
+        if (card) {
+          card.classList.add("melt-off");
+          setTimeout(() => { card.remove(); }, 1000);
+        }
+      }
+      updateTicketCounters();
+    }
+    
+    // -----------------------
+    // TICKET DELETION
+    // -----------------------
+    async function removeTicketFromDB(ticketId) {
+      try {
+        const response = await fetch(`${DELETE_ENDPOINT}${ticketId}/`, {
+          method: "DELETE"
+        });
+        if (response.ok) {
+          console.log(`Ticket #${ticketId} successfully deleted from the database.`);
+        } else {
+          console.error(`Failed to delete ticket #${ticketId}. Status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`Error deleting ticket #${ticketId}:`, error);
+      }
+    }
+    
+    async function deleteSelectedTickets() {
+      console.log("Delete Selected button pressed");
+      const selectedCheckboxes = document.querySelectorAll(".ticket-checkbox:checked");
+      console.log("Selected checkboxes count:", selectedCheckboxes.length);
+      if (selectedCheckboxes.length === 0) {
+        alert("No tickets selected for deletion.");
+        return;
+      }
+      for (const checkbox of selectedCheckboxes) {
+        const ticketId = checkbox.dataset.id;
+        console.log("Deleting ticket with ID:", ticketId);
+        await removeTicketFromDB(ticketId);
+        removeTicketLocally(ticketId);
+      }
+      updateTicketCounters();
+      // Do not re-render entire page; update only the affected parts.
+    }
+    
+    async function deleteAllTickets() {
+      if (!confirm("Are you sure you want to delete ALL tickets?")) return;
+      for (const ticket of [...allTickets]) {
+        await removeTicketFromDB(ticket.id);
+        removeTicketLocally(ticket.id);
+      }
+      updateTicketCounters();
+      console.log("All tickets have been successfully deleted from the database.");
+    }
+    
+    function removeTicketLocally(ticketId) {
+      const index = allTickets.findIndex(ticket => ticket.id.toString() === ticketId);
+      if (index > -1) {
+        allTickets.splice(index, 1);
+      }
+      const cardElement = document.getElementById(`ticket-${ticketId}`);
+      if (cardElement) {
+        cardElement.remove();
+      }
+      localStorage.removeItem(`ticket-${ticketId}`);
+    }
+    
+    // -----------------------
+    // TICKET COUNTERS
+    // -----------------------
+    function updateTicketCounters() {
+      const activeTickets = allTickets.filter(ticket => ticket.status !== "archived").length;
+      const archivedTickets = allTickets.filter(ticket => ticket.status === "archived").length;
+      activeCountEl.innerText = activeTickets;
+      archivedCountEl.innerText = archivedTickets;
+    }
+    
+    // -----------------------
+    // DRAG & DROP LOGIC
+    // -----------------------
+    let draggedCard = null;
+    function handleDragStart(e) {
+      draggedCard = this;
+      this.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", this.id);
+    }
+    function handleDragEnd() {
+      this.classList.remove("dragging");
+      draggedCard = null;
+    }
+    
+    function initializeDragAndDrop() {
+      const columns = document.querySelectorAll(".kanban-column");
+      columns.forEach(column => {
+        column.addEventListener("dragover", handleDragOver);
+        column.addEventListener("dragenter", handleDragEnter);
+        column.addEventListener("dragleave", handleDragLeave);
+        column.addEventListener("drop", handleDrop);
+      });
+    }
+    function handleDragOver(e) { e.preventDefault(); }
+    function handleDragEnter(e) {
+      e.preventDefault();
+      this.classList.add("drag-over");
+    }
+    function handleDragLeave() {
+      this.classList.remove("drag-over");
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      this.classList.remove("drag-over");
+      const ticketId = e.dataTransfer.getData("text/plain");
+      const ticketElement = document.getElementById(ticketId);
+      const newStatus = this.getAttribute("data-step");
+      const columnBody = this.querySelector(".column-body");
+      columnBody.appendChild(ticketElement);
+      updateTicketStatus(ticketId, newStatus);
+      // Update only the affected ticket's table row if needed.
+    }
+    
+    // -----------------------
+    // SELECTION FUNCTIONALITY
+    // -----------------------
+    function toggleSelectAll() {
+      const checkboxes = document.querySelectorAll(".ticket-checkbox");
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+        const card = document.getElementById(`ticket-${checkbox.dataset.id}`);
+        if (card) {
+          card.classList.toggle("selected", checkbox.checked);
+        }
+      });
+    }
+    
+    // -----------------------
+    // PERSIST CONNECTION STATE ON LOAD
+    // -----------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      initializeDragAndDrop();
+      if (localStorage.getItem("dbConnected") === "true") {
+        dbConnected = true;
+        dbStatusBar.innerText = "Connected";
+        dbStatusBar.classList.remove('bg-danger', 'bg-info', 'bg-warning');
+        dbStatusBar.classList.add('bg-success');
+        dbStatusBar.style.width = "100%";
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        console.log("Persisted connection state: Connected");
+        fetchTickets();
+      }
+    });
+  </script>
+  
+
+</html>

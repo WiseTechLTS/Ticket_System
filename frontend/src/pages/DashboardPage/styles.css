@@ -1,0 +1,119 @@
+/* General Page Styling */
+body {
+  background-color: #1c1e21;
+  color: #f8f9fa;
+  font-family: "Arial", sans-serif;
+  margin: 0;
+}
+
+.dashboard-container {
+  max-width: 95%;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Error & No Data Messages */
+.error-message, .no-data-message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #ff6b6b;
+}
+
+/* Responsive Table */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #2a2d32;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Table Headers */
+.ticket-table thead {
+  background-color: #343a40;
+  color: white;
+}
+
+.ticket-table th {
+  padding: 12px;
+  text-align: left;
+}
+
+/* Striped Rows */
+.ticket-table tbody tr:nth-child(even) {
+  background-color: #3c4045;
+}
+
+.ticket-table tbody tr:nth-child(odd) {
+  background-color: #2a2d32;
+}
+
+.ticket-table td {
+  padding: 10px;
+  border-bottom: 1px solid #444;
+}
+
+/* Priority Styling */
+.priority-1 {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.priority-2 {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.priority-3 {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Ticket Images */
+.ticket-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+/* Download Button */
+.download-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.download-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .ticket-table th, .ticket-table td {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .ticket-image {
+    width: 40px;
+    height: 40px;
+  }
+}

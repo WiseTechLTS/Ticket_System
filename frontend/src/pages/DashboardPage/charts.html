@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    =======================================================================
+    Title:       Database Analytics Dashboard
+    Description: Showcases dynamic Chart.js-based visualizations of ticket 
+                 data, complete with Bootstrap styling for responsiveness.
+    Author:      Your Team
+    =======================================================================
+  -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Page Title -->
+  <title>Database Analytics Dashboard</title>
+
+  <!-- Bootstrap (CSS) - For Grid and Basic Styling -->
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" 
+    rel="stylesheet"
+  />
+
+  <!-- Chart.js - For Dynamic Chart Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Inline Styles 
+       Ideally, these should be migrated to a separate CSS file for 
+       enterprise-level projects to facilitate maintainability and caching.
+  -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #f7f9fc;
+      color: #333;
+      font-family: sans-serif;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+      background-color: #134d74;
+      padding: 10px 0;
+      color: #fff;
+    }
+
+    #chartsSection {
+      margin: 20px auto;
+      padding: 15px;
+      max-width: 1200px;
+    }
+
+    .chart-container {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid d-flex flex-column">
+    <!-- Header Section -->
+    <header class="sticky-header text-center">
+      <h1 class="mb-1">Database Analytics Dashboard</h1>
+      <p class="mb-0">Visualizing key performance metrics through dynamic charts.</p>
+    </header>
+
+    <!-- Main Content -->
+    <main id="chartsSection" class="container">
+      <!-- Pie Chart: Ticket Priority Distribution -->
+      <div class="chart-container">
+        <h3 class="text-center">Ticket Priority Distribution</h3>
+        <canvas id="priorityChart"></canvas>
+      </div>
+
+      <!-- Bar Chart: Tickets by Department -->
+      <div class="chart-container">
+        <h3 class="text-center">Tickets by Department</h3>
+        <canvas id="departmentChart"></canvas>
+      </div>
+
+      <!-- Line Chart: Ticket Trends Over Time -->
+      <div class="chart-container">
+        <h3 class="text-center">Ticket Trends Over Time</h3>
+        <canvas id="trendsChart"></canvas>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts 
+       Consider centralizing scripts in a separate file for production-ready 
+       deployments, enabling version control, caching, and improved load times.
+  -->
+  <script>
+    // =========================================================================
+    // Sample Data (for demonstration purposes; in production, fetch data via API)
+    // =========================================================================
+    const priorityData = {
+      labels: ['Low', 'Medium', 'High', 'Unknown'],
+      datasets: [{
+        data: [35, 25, 15, 5],
+        backgroundColor: [
+          "rgba(40, 167, 69, 0.5)",  // Low
+          "rgba(255, 193, 7, 0.5)",  // Medium
+          "rgba(220, 53, 69, 0.5)",  // High
+          "rgba(108, 117, 125, 0.5)" // Unknown
+        ]
+      }]
+    };
+
+    const departmentData = {
+      labels: ['Sales', 'Support', 'Engineering', 'HR', 'Finance'],
+      datasets: [{
+        label: "Ticket Count",
+        data: [12, 19, 8, 5, 10],
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.5)",
+          "rgba(54, 162, 235, 0.5)",
+          "rgba(255, 206, 86, 0.5)",
+          "rgba(75, 192, 192, 0.5)",
+          "rgba(153, 102, 255, 0.5)"
+        ]
+      }]
+    };
+
+    const trendsData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+      datasets: [{
+        label: "Tickets Over Time",
+        data: [5, 9, 7, 10, 12, 8, 15],
+        borderColor: "rgba(54, 162, 235, 0.8)",
+        backgroundColor: "rgba(54, 162, 235, 0.3)",
+        fill: true,
+        tension: 0.4
+      }]
+    };
+
+    // =========================================================================
+    // Reusable Chart Rendering Function
+    // =========================================================================
+    function renderChart(canvasId, chartType, chartData, customTitle) {
+      const context = document.getElementById(canvasId).getContext('2d');
+      new Chart(context, {
+        type: chartType,
+        data: chartData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true, position: 'bottom' },
+            title: { display: true, text: customTitle }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // Initialize Charts
+    // =========================================================================
+    renderChart("priorityChart", "pie", priorityData, "Ticket Priority Distribution");
+    renderChart("departmentChart", "bar", departmentData, "Tickets by Department");
+    renderChart("trendsChart", "line", trendsData, "Ticket Trends Over Time");
+  </script>
+</body>
+</html>

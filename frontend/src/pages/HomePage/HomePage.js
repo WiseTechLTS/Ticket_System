@@ -3,7 +3,7 @@ import useAuth from "../../hooks/useAuth";
 import axios from "axios";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-
+import './styles.css';
 /**
  * Primary component that fetches tickets and renders:
  *  - The existing "table view" of tickets
@@ -20,7 +20,7 @@ const HomePage = () => {
         // Make sure to include a space between "Bearer" and token
         const response = await axios.get("http://10.10.10.1:8000/api/tickets/all/", {
           headers: {
-            Authorization: "Bearer " + token,
+            Authorization: "Bearer" + token,
           },
         });
         setTickets(response.data);
@@ -34,6 +34,7 @@ const HomePage = () => {
   }, [token]);
 
   return (
+    
     <div className="container-fluid align-items-center">
       <h1>Home Page for {user.username}!</h1>
 
