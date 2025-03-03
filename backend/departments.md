@@ -1,0 +1,54 @@
+Main Departments
+----------------
+1. Medical
+2. Administrative
+3. Support / Ancillary
+
+Medical Department
+------------------
+Priority Level 1:
+- PEDIATRICS
+- OB-GYN
+- CARDIOLOGY
+- ONCOLOGY
+- ORTHOPEDICS
+- NEUROLOGY
+- PSYCHIATRY AND MENTAL HEALTH
+- DERMATOLOGY
+- RADIOLOGY AND IMAGING
+- PATHOLOGY
+
+Priority Level 3:
+- OUTPATIENT DEPARTMENT (OPD)
+- EMERGENCY DEPARTMENT (ED)
+- INPATIENT DEPARTMENT
+- SURGERY (OR)
+- INTENSIVE CARE UNIT (ICU)
+
+Administrative Department
+-------------------------
+Priority Level 1:
+- BILLING AND FINANCE
+- HUMAN RESOURCES (HR)
+- MEDICAL RECORDS
+- QUALITY ASSURANCE
+- PUBLIC RELATIONS / MARKETING
+
+Priority Level 3:
+- ADMISSIONS AND REGISTRATION
+
+Support / Ancillary Department
+------------------------------
+Priority Level 1:
+- PHARMACY
+- LABORATORY SERVICES
+- BIOMEDICAL ENGINEERING
+
+Priority Level 2:
+- HOUSEKEEPING / ENVIRONMENTAL SERVICES
+- CATERING AND NUTRITION
+
+Priority Level 3:
+- SECURITY
+- IT / TECHNOLOGY
+- TRANSPORT SERVICES

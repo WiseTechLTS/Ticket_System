@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Database Objects Dashboard</title>
+  
+  <!-- Bootstrap CSS -->
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" 
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: #134D74; /* Example brand color */
+      color: white;
+      padding: 1rem;
+    }
+    h1, p {
+      margin: 0;
+    }
+    main {
+      flex: 1;
+      padding: 1rem;
+    }
+    footer {
+      background-color: #f8f9fa;
+      padding: 1rem;
+      text-align: center;
+    }
+    .card {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header with Navigation -->
+  <header class="mb-4">
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
+      <div>
+        <h1 class="fw-bold">Database Objects</h1>
+        <p class="m-0">Responsive grid display of all items.</p>
+      </div>
+      <nav class="mt-3 mt-md-0">
+        <a href="http://10.10.10.1:8000/admin/" class="btn btn-light me-2">Django Database</a>
+        <a href="archive.html" class="btn btn-dark me-2">View Archived Tickets</a>
+        <a href="charts.html" class="btn btn-primary me-2">View Charts</a>
+        <a href="kanban.html" class="btn btn-primary">View Kanban Board</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="container">
+    <section id="dataGrid" class="row">
+      <!-- Example static card to illustrate layout; overwritten by JS data -->
+      <article class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title text-primary">Ticket #1</h5>
+            <p class="card-text"><strong>Issue:</strong> N/A</p>
+            <p class="card-text"><strong>Priority:</strong> <span class="badge bg-secondary">N/A</span></p>
+            <p class="card-text"><strong>Status:</strong> <span>N/A</span></p>
+            <p class="card-text"><strong>Time Elapsed:</strong> <span>—</span></p>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <small>&copy; 2025 Acme Corp. All rights reserved.</small>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    const API_URL = "http://10.10.10.1:8000/api/ticketing/all/";
+    const MEDIA_URL = "http://10.10.10.1:8000";
+
+    document.addEventListener("DOMContentLoaded", fetchData);
+
+    async function fetchData() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        displayData(data);
+        startTimers(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        document.getElementById("dataGrid").innerHTML = `
+          <p class='text-danger text-center'>⚠️ Unable to load data. Please try again later.</p>
+        `;
+      }
+    }
+
+    function displayData(items) {
+      const grid = document.getElementById("dataGrid");
+      grid.innerHTML = "";
+
+      if (!Array.isArray(items) || items.length === 0) {
+        grid.innerHTML = "<p class='text-center text-muted'>No data available.</p>";
+        return;
+      }
+
+      items.forEach(item => {
+        const card = createCard(item);
+        grid.appendChild(card);
+      });
+    }
+
+    function createCard(item) {
+      // Build the article wrapper
+      const cardWrapper = document.createElement("article");
+      cardWrapper.classList.add("col-md-4", "mb-4");
+
+      // File attachments
+      const fileContent = createFileContent(item.file);
+      // Priority badge
+      const priorityBadge = createPriorityBadge(item.priority);
+
+      const statusText = item.status || "N/A";
+
+      // We'll track each card's creation time in a data attribute
+      // so we can run a timer for each item individually.
+      const createdAt = item.created_at || null; 
+      
+      // Construct the inner HTML
+      cardWrapper.innerHTML = `
+        <div class="card">
+          ${fileContent}
+          <div class="card-body">
+            <img 
+              class="card-img-top mb-3" 
+              src="${MEDIA_URL}${item.image}" 
+              alt="${item.image_url || 'Attached image'}"
+            >
+            <h5 class="card-title text-primary">Ticket #${item.id}</h5>
+            <p class="card-text"><strong>Issue:</strong> ${item.issue || "N/A"}</p>
+            <p class="card-text"><strong>Priority:</strong> 
+              <span>${priorityBadge}</span>
+            </p>
+            <p class="card-text">
+              <strong>Status:</strong> 
+              <span id="status-${item.id}">${statusText}</span>
+            </p>
+            <p class="card-text">
+              <strong>Time Elapsed:</strong> 
+              <span id="timer-${item.id}">—</span>
+            </p>
+          </div>
+        </div>
+      `;
+
+      // Store creation time in an attribute (if available)
+      if (createdAt) {
+        cardWrapper.setAttribute("data-created-at", createdAt);
+      }
+
+      return cardWrapper;
+    }
+
+    function createFileContent(filePath) {
+      if (!filePath) return "";
+      const fileExtension = filePath.split('.').pop().toLowerCase();
+      if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
+        return `<img src="${MEDIA_URL}${filePath}" class="card-img-top" alt="Attached Image">`;
+      } 
+      return `
+        <div class="card-body text-center">
+          <a href="${MEDIA_URL}${filePath}" target="_blank" class="btn btn-primary">
+            Download File
+          </a>
+        </div>
+      `;
+    }
+
+    function createPriorityBadge(priority) {
+      let badgeClass = "bg-secondary";
+      let priorityText = "";
+      if (typeof priority === "number") {
+        const priorityMap = { 1: "low", 2: "medium", 3: "high" };
+        priorityText = priorityMap[priority] || "unknown";
+      } else if (typeof priority === "string") {
+        priorityText = priority.toLowerCase();
+      } else {
+        priorityText = "N/A";
+      }
+
+      if (priorityText === "high") badgeClass = "bg-danger";
+      else if (priorityText === "medium") badgeClass = "bg-warning";
+      else if (priorityText === "low") badgeClass = "bg-success";
+
+      return `<span class="badge ${badgeClass}">${priorityText}</span>`;
+    }
+
+    /* 
+      Dynamically calculates and displays how much time has 
+      elapsed since each ticket's creation date.
+    */
+    function startTimers(items) {
+      // Update timers every second
+      setInterval(() => {
+        items.forEach(item => {
+          const createdAt = item.created_at ? new Date(item.created_at) : null;
+          if (!createdAt) return; // If no created_at, skip
+
+          const now = new Date();
+          const elapsedSeconds = Math.floor((now - createdAt) / 1000);
+
+          const hours = Math.floor(elapsedSeconds / 3600);
+          const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+          const seconds = elapsedSeconds % 60;
+
+          // Update the timer display
+          const timerElement = document.getElementById(`timer-${item.id}`);
+          if (timerElement) {
+            timerElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+          }
+        });
+      }, 1000);
+    }
+  </script>
+
+  <!-- Bootstrap JS (Optional) -->
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js">
+  </script>
+</body>
+</html>

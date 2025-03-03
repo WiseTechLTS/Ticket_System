@@ -1,0 +1,48 @@
+{
+    "departments": [
+        {
+            "name": "Medical",
+            "sub_departments": [
+                {"name": "Emergency Department (ED)", "priority_level": 3},
+                {"name": "Outpatient Department (OPD)", "priority_level": 3},
+                {"name": "Inpatient Department", "priority_level": 3},
+                {"name": "Surgery (OR)", "priority_level": 3},
+                {"name": "Intensive Care Unit (ICU)", "priority_level": 3},
+                {"name": "Pediatrics", "priority_level": 2},
+                {"name": "OB-GYN", "priority_level": 2},
+                {"name": "Cardiology", "priority_level": 2},
+                {"name": "Oncology", "priority_level": 2},
+                {"name": "Orthopedics", "priority_level": 2},
+                {"name": "Neurology", "priority_level": 3},
+                {"name": "Psychiatry and Mental Health", "priority_level": 2},
+                {"name": "Dermatology", "priority_level": 2},
+                {"name": "Radiology and Imaging", "priority_level": 2},
+                {"name": "Pathology", "priority_level": 2}
+            ]
+        },
+        {
+            "name": "Administrative",
+            "sub_departments": [
+                {"name": "Admissions and Registration", "priority_level": 3},
+                {"name": "Billing and Finance", "priority_level": 1},
+                {"name": "Human Resources (HR)", "priority_level": 1},
+                {"name": "Medical Records", "priority_level": 1},
+                {"name": "Quality Assurance", "priority_level": 1},
+                {"name": "Public Relations / Marketing", "priority_level": 1}
+            ]
+        },
+        {
+            "name": "Support / Ancillary",
+            "sub_departments": [
+                {"name": "Pharmacy", "priority_level": 2},
+                {"name": "Laboratory Services", "priority_level": 2},
+                {"name": "Biomedical Engineering", "priority_level": 2},
+                {"name": "Housekeeping / Environmental Services", "priority_level": 1},
+                {"name": "Catering and Nutrition", "priority_level": 1},
+                {"name": "Security", "priority_level": 3},
+                {"name": "IT / Technology", "priority_level": 3},
+                {"name": "Transport Services", "priority_level": 3}
+            ]
+        }
+    ]
+}

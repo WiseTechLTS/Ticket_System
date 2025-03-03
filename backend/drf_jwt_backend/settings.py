@@ -27,7 +27,6 @@ ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = 'authentication.User'
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 # Application definition
 
@@ -39,10 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
     'authentication.apps.AuthenticationConfig',
     'corsheaders',
-    'ticketing',
+    'tickets.apps.TicketsConfig',
     'cars.apps.CarsConfig'  # This app is for example use only
 ]
 
@@ -55,21 +53,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-   
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = [
-    'http://10.10.10.6:5500',
-    'http://10.10.10.1:3000',
-    'http://localhost:3000',
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    'http://10.10.10.1:3000',
-    'http://localhost:3000',
-    'http://10.10.10.6:5500',
-]
 
 ROOT_URLCONF = 'drf_jwt_backend.urls'
 
@@ -129,12 +115,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Ensure this points to the correct directory
-]
-
-# For production, add:
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

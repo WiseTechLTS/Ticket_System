@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hospital Service Order</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      padding: 0;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .header-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header-section p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+    .form-section {
+      margin-bottom: 20px;
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .form-row label {
+      width: 150px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .form-row input[type="text"] {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    .note-section {
+      font-size: 0.9rem;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .work-performed {
+      margin-bottom: 20px;
+    }
+    .work-performed label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .work-performed textarea {
+      width: 100%;
+      height: 100px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      resize: vertical;
+    }
+    .contact-note {
+      font-size: 0.9rem;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .signature-section {
+      margin-top: 20px;
+    }
+    .signature-section label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .signature-section input[type="text"] {
+      width: 300px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    .date-section {
+      margin-top: 10px;
+    }
+    .date-section label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .date-section input[type="date"] {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Main Title -->
+  <h1>Hospital Service Order</h1>
+
+  <!-- Department Information -->
+  <div class="header-section">
+    <p><strong>Department:</strong> 5333 FM1640, Richmond TX 77469 (281) 239-1500</p>
+  </div>
+
+  <!-- Form Information -->
+  <div class="form-section">
+    <div class="form-row">
+      <label for="formNumber">Number:</label>
+      <input type="text" id="formNumber" name="formNumber">
+    </div>
+    <div class="form-row">
+      <label for="dateField">Date:</label>
+      <input type="date" id="dateField" name="dateField">
+    </div>
+    <div class="form-row">
+      <label for="subDept">Sub Department:</label>
+      <input type="text" id="subDept" name="subDept">
+    </div>
+    <div class="form-row">
+      <label for="priority">Priority:</label>
+      <input type="text" id="priority" name="priority">
+    </div>
+    <div class="form-row">
+      <label for="assigned">Assigned to:</label>
+      <input type="text" id="assigned" name="assigned" value="Helpdesk">
+    </div>
+  </div>
+
+  <!-- Issue Description -->
+  <div class="form-section">
+    <div class="form-row">
+      <label for="issueDescription">Issue description:</label>
+      <input type="text" id="issueDescription" name="issueDescription">
+    </div>
+  </div>
+
+  <!-- Contact and Note Section -->
+  <div class="note-section">
+    <p>
+      If you need any assistance, please contact help or technician support at <strong>832-278-9612</strong>.
+    </p>
+    <p>
+      <em>Note:</em> You must check in with the help desk before entering the jobsite. 
+      After you have completed the job, report the project as completed and note the work you did. 
+      Then sign out at the help desk and email us back the form.
+    </p>
+  </div>
+
+  <!-- Work Performed -->
+  <div class="work-performed">
+    <label for="workPerformed">Work Performed:</label>
+    <textarea id="workPerformed" name="workPerformed"></textarea>
+  </div>
+
+  <!-- Signature Section (Optional) -->
+  <div class="signature-section">
+    <label for="signature">Technician Signature:</label>
+    <input type="text" id="signature" name="signature">
+  </div>
+
+  <div class="date-section">
+    <label for="signatureDate">Date Signed:</label>
+    <input type="date" id="signatureDate" name="signatureDate">
+  </div>
+
+  <!-- Footer or Additional Instructions -->
+  <div class="contact-note">
+    <p>Thank you for your cooperation.</p>
+  </div>
+
+</body>
+</html>

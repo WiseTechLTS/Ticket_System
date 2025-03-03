@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hospital Service Order</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+
+    .page-header {
+      text-align: center;
+      padding: 20px;
+      border-bottom: 2px solid #ccc;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+
+    .page-header h2 {
+      margin: 5px 0 0;
+      font-size: 1.4em;
+      color: #555;
+    }
+
+    .form-container {
+      width: 800px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .form-group {
+      flex: 1 1 50%;
+      min-width: 250px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .form-group textarea {
+      height: 80px;
+      resize: vertical;
+    }
+
+    .disclaimer {
+      margin: 20px 0;
+      font-size: 0.95em;
+      color: #333;
+      line-height: 1.4em;
+    }
+
+    .submit-section {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .submit-section button {
+      background-color: #007bff;
+      color: #fff;
+      font-size: 1em;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .submit-section button:hover {
+      background-color: #0056b3;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.85em;
+      color: #666;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Hospital</h1>
+  <h2>Service Order</h2>
+</div>
+
+<div class="form-container">
+  <!-- 
+    CSRF token & method="post" are included if you plan on submitting 
+    this form to a Django view. If you only need a display page, you 
+    can omit the form tags and the token. 
+  -->
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="department">Department</label>
+        <input type="text" id="department" name="department" 
+               value="{{ ticket.department }}" />
+      </div>
+      <div class="form-group">
+        <label for="number">Number</label>
+        <input type="text" id="number" name="number" 
+               value="{{ ticket.number }}" />
+      </div>
+      <div class="form-group">
+        <label for="date">Date</label>
+        <!-- 
+          If you store the date in your ticket as a string or 
+          a datetime, you might need to format it, e.g.:
+          value="{{ ticket.date|date:'Y-m-d' }}"
+        -->
+        <input type="date" id="date" name="date" 
+               value="{{ ticket.date }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="subDepartment">Sub Department</label>
+        <input type="text" id="subDepartment" name="subDepartment" 
+               value="{{ ticket.sub_department }}" />
+      </div>
+      <div class="form-group">
+        <label for="priority">Priority</label>
+        <input type="text" id="priority" name="priority" 
+               value="{{ ticket.priority }}" />
+      </div>
+      <div class="form-group">
+        <label for="assignedTo">Assigned to</label>
+        <input type="text" id="assignedTo" name="assignedTo" 
+               value="{{ ticket.assigned_to }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group" style="flex: 1 1 100%;">
+        <label for="issueDescription">Issue description</label>
+        <textarea id="issueDescription" name="issueDescription">{{ ticket.issue_description }}</textarea>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      If you need any assistance, please contact help or technician support at <strong>832-278-9612</strong>.<br />
+      <em>Note:</em> You MUST check in with the help desk before entering the job site. After you have completed the job, report the project as completed and note the work you did. Then sign out at the help desk and email us back the form.
+    </div>
+
+    <div class="form-row">
+      <div class="form-group" style="flex: 1 1 100%;">
+        <label for="workPerformed">Work Performed</label>
+        <textarea id="workPerformed" name="workPerformed">{{ ticket.work_performed }}</textarea>
+      </div>
+    </div>
+
+    <div class="submit-section">
+      <button type="submit">Submit Form</button>
+    </div>
+  </form>
+</div>
+
+<div class="footer">
+  <p>Hospital &middot; 5333 FM1640 Richmond TX 77469 &middot; (281)239-1500</p>
+</div>
+
+</body>
+</html>

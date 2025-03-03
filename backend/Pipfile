@@ -6,12 +6,10 @@ name = "pypi"
 [packages]
 django = "*"
 djangorestframework = "*"
-tzdata = "*"
-pillow = "*"
-django-cors-headers = "*"
 djangorestframework-simplejwt = "*"
+mysql-connector-python = "*"
+django-cors-headers = "*"
+tzdata = "*"
 
 [dev-packages]
-
-[requires]
-python_version = "3.13"
+autopep8 = "*"

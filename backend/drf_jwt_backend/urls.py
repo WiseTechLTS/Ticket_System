@@ -22,7 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/cars/', include('cars.urls')),
-    path('api/ticketing/', include('ticketing.urls')),
+    path('api/tickets/', include('tickets.urls')
+    )
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# Compare this snippet from database/ReactDjango_JWT_StarterCode-main/backend/drf_jwt_backend/urls.py:
-
