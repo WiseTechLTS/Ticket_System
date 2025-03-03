@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,7 +13,6 @@
       display: flex;
       flex-direction: column;
     }
-<<<<<<< HEAD
 
     .container-fluid {
       flex: 1;
@@ -27,14 +23,6 @@
       /* Pushes cards halfway down */
     }
 
-=======
-    .container-fluid {
-      flex: 1;
-    }
-    #dataGrid {
-      margin-top: 50vh; /* Pushes cards halfway down */
-    }
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .sticky-header {
       position: sticky;
       width: 100%;
@@ -43,44 +31,31 @@
       padding: 10px 0;
       color: white;
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .card {
       border: 1px solid #ccc;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .metatron {
       margin-top: 25vh;
       width: 100%;
       height: 100%;
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .row-container {
       display: flex;
       gap: 40px;
       perspective: 1000px;
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .cube-container {
       width: 100%;
       height: 150px;
       transform-style: preserve-3d;
       animation: spinX 5s linear infinite, spinY 5s alternate-reverse infinite;
     }
-<<<<<<< HEAD
 
     .cube1 {
       animation-delay: 0s;
@@ -115,71 +90,35 @@
       }
     }
 
-=======
-    .cube1 {
-      animation-delay: 0s;
-    }
-    .cube2 {
-      animation-delay: 1s;
-    }
-    .cube3 {
-      animation-delay: 2s;
-    }
-    @keyframes spinX {
-      0% { transform: rotateX(0deg); }
-      100% { transform: rotateX(360deg); }
-    }
-    @keyframes spinY {
-      0% { transform: rotateY(0deg); }
-      100% { transform: rotateY(360deg); }
-    }
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .metatron {
       width: 100%;
       height: 100%;
       transform-origin: center;
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .layer {
       position: absolute;
       width: 100%;
       height: 100%;
       transform-origin: center;
     }
-<<<<<<< HEAD
 
     .layer1 {
       transform: translateZ(10px) rotateZ(0deg);
     }
 
-=======
-    .layer1 {
-      transform: translateZ(10px) rotateZ(0deg);
-    }
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     .layer2 {
       transform: translateZ(-10px) rotateZ(180deg);
     }
   </style>
 </head>
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
 <body>
   <div class="container-fluid mb-4">
     <header class="text-center mb-4 sticky-header">
       <h1>Database Objects</h1>
       <p>Displaying all objects in a responsive grid format.</p>
       <a href="archive.html" class="btn btn-dark">View Archived Tickets</a>
-<<<<<<< HEAD
-      <a href="charts.html" class="btn btn-primary">View Charts</a>
-
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     </header>
     <div id="metatron" class="container-fluid">
       <section>
@@ -208,10 +147,7 @@
               </svg>
             </div>
           </div>
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
           <div class="cube-container cube2">
             <div class="layer layer1">
               <svg class="metatron" viewBox="0 0 200 200">
@@ -236,10 +172,7 @@
               </svg>
             </div>
           </div>
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
           <div class="cube-container cube3">
             <div class="layer layer1">
               <svg class="metatron" viewBox="0 0 200 200">
@@ -274,7 +207,6 @@
             <h5 class="card-title text-primary">Ticket #1</h5>
             <p class="card-text"><strong>Issue:</strong> N/A</p>
             <p class="card-text"><strong>Priority:</strong> <span class="badge bg-secondary">N/A</span></p>
-<<<<<<< HEAD
             <p class="card-text"><strong>Escalation Step:</strong> 1/4</p>
             <button class="btn btn-warning btn-sm" onclick="escalateTicket(1)">Escalate</button>
           </div>
@@ -282,20 +214,6 @@
       </div>
 
       <!-- Cards will be dynamically inserted here -->
-=======
-            <p class="card-text"><strong>Escalation Step:</strong> <span id="step-1">1/4</span></p>
-            <!-- Admin Fix Selector replaces the escalation button -->
-            <select class="form-select form-select-sm" onchange="adminFixTicket(1, this.value)" id="admin-fix-1">
-              <option value="">Select Admin Fix</option>
-              <option value="reset">Reset Escalation</option>
-              <option value="approve">Approve Work</option>
-              <option value="archive">Archive Ticket</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <!-- Additional cards will be dynamically inserted here -->
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     </section>
   </div>
 
@@ -337,10 +255,7 @@
       });
     }
 
-<<<<<<< HEAD
     // Updated createPriorityBadge function to convert numbers to strings and then apply toLowerCase()
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
     function createPriorityBadge(priority) {
       let badgeClass = "bg-secondary";
       let priorityText = "";
@@ -366,10 +281,7 @@
 
       const fileContent = createFileContent(item.file);
       const priorityBadge = createPriorityBadge(item.priority);
-<<<<<<< HEAD
 
-=======
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
       let escalationStep = JSON.parse(localStorage.getItem(`ticket-${item.id}`)) || 1;
       if (archivedTickets[item.id]) {
         escalationStep = "Archived";
@@ -379,21 +291,12 @@
       <div class="card">
           ${fileContent}
           <div class="card-body">
-              <img class="card-img-top" src="${MEDIA_URL}${item.image}" alt="${item.image_url}">
+              <img class="card-img-top" src="${MEDIA_URL}${item.image}" alt="Card image cap">
               <h5 class="card-title text-primary">Ticket #${item.id}</h5>
               <p class="card-text"><strong>Issue:</strong> ${item.issue || "N/A"}</p>
               <p class="card-text"><strong>Priority:</strong> <span id="priority-${item.id}">${priorityBadge}</span></p>
               <p class="card-text"><strong>Escalation Step:</strong> <span id="step-${item.id}">${escalationStep}/4</span></p>
-<<<<<<< HEAD
               <button class="btn btn-warning btn-sm" onclick="escalateTicket(${item.id})" ${escalationStep === "Archived" ? "disabled" : ""}>Escalate</button>
-=======
-              <select class="form-select form-select-sm" onchange="adminFixTicket(${item.id}, this.value)" id="admin-fix-${item.id}" ${escalationStep === "Archived" ? "disabled" : ""}>
-                <option value="">Select Admin Fix</option>
-                <option value="reset">Reset Escalation</option>
-                <option value="approve">Approve Work</option>
-                <option value="archive">Archive Ticket</option>
-              </select>
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
           </div>
       </div>
       `;
@@ -410,7 +313,6 @@
       }
     }
 
-<<<<<<< HEAD
     function escalateTicket(ticketId) {
       let step = JSON.parse(localStorage.getItem(`ticket-${ticketId}`)) || 1;
 
@@ -462,43 +364,3 @@
 </body>
 
 </html>
-=======
-    function adminFixTicket(ticketId, action) {
-      if (!action) return; // No action selected.
-      switch(action) {
-        case "reset":
-          localStorage.setItem(`ticket-${ticketId}`, JSON.stringify(1));
-          document.getElementById(`step-${ticketId}`).innerText = `1/4`;
-          alert(`Ticket #${ticketId} has been successfully reset to the initial escalation step.`);
-          break;
-        case "approve":
-          let step = JSON.parse(localStorage.getItem(`ticket-${ticketId}`)) || 1;
-          if (step < 3) {
-            step = 3;
-            localStorage.setItem(`ticket-${ticketId}`, JSON.stringify(step));
-            document.getElementById(`step-${ticketId}`).innerText = `${step}/4`;
-            alert(`Ticket #${ticketId} has advanced to the admin approval step.`);
-          } else {
-            alert(`Ticket #${ticketId} is already at or beyond the admin approval stage.`);
-          }
-          break;
-        case "archive":
-          archivedTickets[ticketId] = { status: "Archived", escalated_at: new Date().toISOString() };
-          localStorage.setItem("archivedTickets", JSON.stringify(archivedTickets));
-          document.getElementById(`step-${ticketId}`).innerText = "Archived";
-          const selectElem = document.getElementById(`admin-fix-${ticketId}`);
-          if(selectElem) {
-            selectElem.disabled = true;
-          }
-          alert(`Ticket #${ticketId} has been archived as per the administrative directive.`);
-          break;
-        default:
-          alert("Invalid admin action selected. Please choose a valid option from the dropdown.");
-      }
-      // Reset the selector to default after action is taken.
-      document.getElementById(`admin-fix-${ticketId}`).value = "";
-    }
-  </script>
-</body>
-</html>
->>>>>>> 58cd98e6dc8fbccbc6ee57efd57ae27aa519d263
